@@ -11,6 +11,9 @@ export const Button: React.FC<ButtonProps> = ({ text, className, ...other }) => 
       {...other}
       className={twMerge(
         'h-8 w-20 cursor-pointer rounded border border-gray-400 bg-[#5e7291] text-gray-200',
+        'hover:bg-[#4a5a75]', // темнее при наведении
+        'hover:scale-105', // увеличение размера
+        'transition-all duration-200', // плавная анимация
         className && className,
       )}
     >
