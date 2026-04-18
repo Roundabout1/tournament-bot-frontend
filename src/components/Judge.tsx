@@ -1,63 +1,194 @@
 import { ButtonsList } from './ButtonsList';
 import { Title } from './Title';
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
-('file-saver');
 
 export const Judge: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [clientId, setClientId] = useState<string>('');
+  const wsRef = useRef<WebSocket | null>(null);
 
-  const saveFile = (blob: Blob, name: string) => {
-    const blobURL = URL.createObjectURL(blob);
-    // Сделать невидимый HTML-элемент `<a download>`
-    // и включить его в документ
-    const a = document.createElement('a');
-    a.href = blobURL;
-    a.download = name;
-    a.style.display = 'none';
-    document.body.append(a);
-    // Программно кликнуть по ссылке.
-    a.click();
-    // Уничтожить большой blob URL
-    // и удалить ссылку из документа
-    // после клика по ней
-    setTimeout(() => {
-      URL.revokeObjectURL(blobURL);
-      a.remove();
-    }, 1000);
+  // Получаем или создаём client_id при загрузке компонента
+  useEffect(() => {
+    // Пробуем получить ID из sessionStorage или генерируем новый
+    let savedId = sessionStorage.getItem('ws_client_id');
+    if (!savedId) {
+      savedId = `judge_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem('ws_client_id', savedId);
+    }
+    setClientId(savedId);
+    
+    // Подключаемся к WebSocket
+    connectWebSocket(savedId);
+    
+    // Отключаемся при размонтировании компонента
+    return () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
+
+  // Функция подключения к WebSocket
+  const connectWebSocket = (id: string) => {
+    // Определяем WebSocket URL (используем текущий хост)
+    const wsUrl = `ws://${window.location.hostname}:8000/ws/${id}`;
+    console.log(`ws://${window.location.hostname}:8000/ws/${id}`);
+    console.log(`${window.location.href}`);
+    const websocket = new WebSocket(wsUrl);
+    
+    websocket.onopen = () => {
+      console.log('WebSocket подключен');
+      setIsConnected(true);
+      setMessage('Подключение установлено...');
+    };
+    
+    // обработка входящих сообщений
+    websocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Получено сообщение:', data);
+        
+        // Обрабатываем разные типы сообщений
+        switch (data.type) {
+          case 'connection':
+            // Это подтверждение подключения от сервера
+            setMessage(`✅ ${data.message} (Всего клиентов: ${data.clients_count})`);
+            break;
+            
+          case 'broadcast':
+            setMessage(`📢 Broadcast: ${data.message}`);
+            break;
+            
+          case 'message':
+            setMessage(`💬 ${data.client_id}: ${data.message}`);
+            break;
+            
+          case 'user_joined':
+            setMessage(`👤 Пользователь ${data.client_id} присоединился (Всего: ${data.clients_count})`);
+            break;
+            
+          case 'user_left':
+            setMessage(`👋 Пользователь ${data.client_id} покинул чат (Осталось: ${data.clients_count})`);
+            break;
+
+          case 'create_game_accept':
+            setMessage(`✅ Запрос на создание игры принят...`);
+            break;
+            
+          default:
+            setMessage(`📨 Получено: ${JSON.stringify(data)}`);
+        }
+        
+        // // Через 5 секунд очищаем сообщение (опционально)
+        // setTimeout(() => {
+        //   // if (message === setMessage) {
+        //   //   // Не очищаем если это последнее сообщение
+        //   // }
+        // }, 5000);
+        
+      } catch (error) {
+        console.error('Ошибка парсинга сообщения:', error);
+        setMessage(`Получено: ${event.data}`);
+      }
+    };
+    
+    websocket.onerror = (error) => {
+      console.error('WebSocket ошибка:', error);
+      setMessage('❌ Ошибка подключения к WebSocket');
+      setIsConnected(false);
+    };
+    
+    websocket.onclose = () => {
+      console.log('WebSocket отключен');
+      setIsConnected(false);
+      setMessage('⚠️ Соединение с сервером разорвано');
+      
+      // Пытаемся переподключиться через 3 секунды
+      setTimeout(() => {
+        if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
+          console.log('Попытка переподключения...');
+          connectWebSocket(clientId);
+        }
+      }, 3000);
+    };
+    
+    wsRef.current = websocket;
+  };
+
+  // Функция для отправки сообщения через WebSocket
+  const sendWebSocketMessage = (type: string, content?: any) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const message = {
+        type: type,
+        content: content,
+        timestamp: new Date().toISOString()
+      };
+      wsRef.current.send(JSON.stringify(message));
+      console.log('Отправлено:', message);
+    } else {
+      console.warn('WebSocket не подключен');
+      setMessage('⚠️ Нет соединения с сервером');
+    }
   };
 
   const handleCreateGame = () => {
-    // TODO
+    sendWebSocketMessage('create_game');
+    setMessage('🎮 Создание игры...');
+    // TODO: Остальная логика
   };
 
   const handleSumUpResults = () => {
+    sendWebSocketMessage('sum_up_results', { action: 'sum_up' });
+    setMessage('📊 Подведение итогов...');
     // TODO
   };
 
   const handleEnterResults = () => {
+    sendWebSocketMessage('enter_results', { action: 'enter' });
+    setMessage('✏️ Ввод результатов...');
     // TODO
   };
 
   const handleEdit = () => {
+    sendWebSocketMessage('edit', { action: 'edit' });
+    setMessage('📝 Редактирование...');
     // TODO
   };
 
   const handleStatus = () => {
+    sendWebSocketMessage('status', { action: 'status' });
+    setMessage('ℹ️ Запрос статуса...');
     // TODO
   };
 
   const handleRemovePlayer = () => {
+    sendWebSocketMessage('remove_player', { action: 'remove' });
+    setMessage('🗑️ Удаление игрока...');
     // TODO
   };
 
-  // жеребьёвка
   const handleDraw = () => {
+    sendWebSocketMessage('draw', { action: 'draw' });
+    setMessage('🎲 Жеребьёвка...');
     // TODO
   };
 
   const handleRoundsData = () => {
+    sendWebSocketMessage('rounds_data', { action: 'get_rounds' });
+    setMessage('📋 Запрос данных туров...');
     // TODO
+  };
+
+  const logout = () => {
+    // Закрываем WebSocket соединение
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+    sessionStorage.clear();
+    // TODO: Перенаправление на страницу логина
+    window.location.reload();
   };
 
   const buttons = [
@@ -95,10 +226,6 @@ export const Judge: React.FC = () => {
     },
   ];
 
-  const logout = () => {
-    sessionStorage.clear();
-  };
-
   return (
     <div className="flex h-[100vh] w-[100wh] flex-col place-content-center items-center gap-2 bg-gray-700">
       <button
@@ -116,6 +243,16 @@ export const Judge: React.FC = () => {
       >
         {message === null ? 'Ответ от сервера...' : message}
       </div>
+      
+      {/* Индикатор статуса подключения */}
+      <div className="text-sm text-gray-400">
+        {isConnected ? (
+          <span className="text-green-400">● Подключено к серверу (ID: {clientId})</span>
+        ) : (
+          <span className="text-red-400">○ Нет подключения к серверу</span>
+        )}
+      </div>
+      
       <ButtonsList buttonClassName="w-74 py-2 h-auto" buttons={buttons} />
     </div>
   );
