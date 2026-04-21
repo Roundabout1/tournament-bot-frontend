@@ -3,6 +3,7 @@ import { Button } from './Button';
 type ButtonData = {
   text: string;
   action: () => void;
+  hidden?: boolean;
 };
 
 interface ButtonsListProps {
@@ -14,7 +15,12 @@ export const ButtonsList: React.FC<ButtonsListProps> = ({ buttons, buttonClassNa
   return (
     <div className="flex flex-col gap-2">
       {buttons.map((button) => (
-        <Button className={buttonClassName} onClick={button.action} text={button.text} />
+        <Button
+          className={buttonClassName}
+          onClick={button.action}
+          text={button.text}
+          hidden={button.hidden ?? false}
+        />
       ))}
     </div>
   );
