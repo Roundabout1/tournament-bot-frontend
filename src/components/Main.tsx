@@ -2,13 +2,15 @@ import { ButtonsList } from './ButtonsList';
 import { Title } from './Title';
 import { useState, useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
-/*
+/*** 
 Основной интерфейс
 */
 export const Main: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [clientId, setClientId] = useState<string>('');
+  // TODO: разграничение пользователей на админов и судей
+  const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
 
   // Получаем или создаём client_id при загрузке компонента
@@ -16,6 +18,7 @@ export const Main: React.FC = () => {
     // Пробуем получить ID из sessionStorage или генерируем новый
     let savedId = sessionStorage.getItem('ws_client_id');
     if (!savedId) {
+      // TODO: получение ID с сервера
       savedId = `judge_${Math.random().toString(36).substr(2, 9)}`;
       sessionStorage.setItem('ws_client_id', savedId);
     }
@@ -35,9 +38,8 @@ export const Main: React.FC = () => {
   // Функция подключения к WebSocket
   const connectWebSocket = (id: string) => {
     // Определяем WebSocket URL (используем текущий хост)
+    // TODO: динамическое получение порта с сервера
     const wsUrl = `ws://${window.location.hostname}:8000/ws/${id}`;
-    console.log(`ws://${window.location.hostname}:8000/ws/${id}`);
-    console.log(`${window.location.href}`);
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -200,6 +202,7 @@ export const Main: React.FC = () => {
     {
       text: 'Создать игру',
       action: handleCreateGame,
+      hidden: !IsAdmin,
     },
     {
       text: 'Подвести итоги',
