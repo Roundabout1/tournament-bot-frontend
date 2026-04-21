@@ -18,10 +18,10 @@ export const Judge: React.FC = () => {
       sessionStorage.setItem('ws_client_id', savedId);
     }
     setClientId(savedId);
-    
+
     // Подключаемся к WebSocket
     connectWebSocket(savedId);
-    
+
     // Отключаемся при размонтировании компонента
     return () => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -37,74 +37,77 @@ export const Judge: React.FC = () => {
     console.log(`ws://${window.location.hostname}:8000/ws/${id}`);
     console.log(`${window.location.href}`);
     const websocket = new WebSocket(wsUrl);
-    
+
     websocket.onopen = () => {
       console.log('WebSocket подключен');
       setIsConnected(true);
       setMessage('Подключение установлено...');
     };
-    
+
     // обработка входящих сообщений
     websocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         console.log('Получено сообщение:', data);
-        
+
         // Обрабатываем разные типы сообщений
         switch (data.type) {
           case 'connection':
             // Это подтверждение подключения от сервера
             setMessage(`✅ ${data.message} (Всего клиентов: ${data.clients_count})`);
             break;
-            
+
           case 'broadcast':
             setMessage(`📢 Broadcast: ${data.message}`);
             break;
-            
+
           case 'message':
             setMessage(`💬 ${data.client_id}: ${data.message}`);
             break;
-            
+
           case 'user_joined':
-            setMessage(`👤 Пользователь ${data.client_id} присоединился (Всего: ${data.clients_count})`);
+            setMessage(
+              `👤 Пользователь ${data.client_id} присоединился (Всего: ${data.clients_count})`,
+            );
             break;
-            
+
           case 'user_left':
-            setMessage(`👋 Пользователь ${data.client_id} покинул чат (Осталось: ${data.clients_count})`);
+            setMessage(
+              `👋 Пользователь ${data.client_id} покинул чат (Осталось: ${data.clients_count})`,
+            );
             break;
 
           case 'create_game_accept':
             setMessage(`✅ Запрос на создание игры принят...`);
             break;
-            
+
           default:
             setMessage(`📨 Получено: ${JSON.stringify(data)}`);
         }
-        
+
         // // Через 5 секунд очищаем сообщение (опционально)
         // setTimeout(() => {
         //   // if (message === setMessage) {
         //   //   // Не очищаем если это последнее сообщение
         //   // }
         // }, 5000);
-        
       } catch (error) {
         console.error('Ошибка парсинга сообщения:', error);
         setMessage(`Получено: ${event.data}`);
       }
     };
-    
+
     websocket.onerror = (error) => {
       console.error('WebSocket ошибка:', error);
       setMessage('❌ Ошибка подключения к WebSocket');
       setIsConnected(false);
     };
-    
+
     websocket.onclose = () => {
       console.log('WebSocket отключен');
       setIsConnected(false);
       setMessage('⚠️ Соединение с сервером разорвано');
-      
+
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
@@ -113,7 +116,7 @@ export const Judge: React.FC = () => {
         }
       }, 3000);
     };
-    
+
     wsRef.current = websocket;
   };
 
@@ -123,7 +126,7 @@ export const Judge: React.FC = () => {
       const message = {
         type: type,
         content: content,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       wsRef.current.send(JSON.stringify(message));
       console.log('Отправлено:', message);
@@ -243,7 +246,7 @@ export const Judge: React.FC = () => {
       >
         {message === null ? 'Ответ от сервера...' : message}
       </div>
-      
+
       {/* Индикатор статуса подключения */}
       <div className="text-sm text-gray-400">
         {isConnected ? (
@@ -252,7 +255,7 @@ export const Judge: React.FC = () => {
           <span className="text-red-400">○ Нет подключения к серверу</span>
         )}
       </div>
-      
+
       <ButtonsList buttonClassName="w-74 py-2 h-auto" buttons={buttons} />
     </div>
   );
