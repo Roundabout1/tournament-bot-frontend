@@ -1,5 +1,5 @@
-import { Judge } from './Judge';
+import { Main } from './Main';
 
 export const App: React.FC = () => {
-  return <Judge />;
+  return <Main />;
 };
