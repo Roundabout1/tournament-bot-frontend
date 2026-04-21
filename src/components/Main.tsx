@@ -1,7 +1,8 @@
 import { ButtonsList } from './ButtonsList';
 import { Title } from './Title';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { CreateGameDialog } from './CreateGameDialog';
 /*** 
 Основной интерфейс
 */
@@ -9,13 +10,13 @@ export const Main: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [clientId, setClientId] = useState<string>('');
+  const [showCreateGame, setShowCreateGame] = useState(false);
+  const [gameCreationStep, setGameCreationStep] = useState<string | null>(null);
   // TODO: разграничение пользователей на админов и судей
   const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Получаем или создаём client_id при загрузке компонента
   useEffect(() => {
-    // Пробуем получить ID из sessionStorage или генерируем новый
     let savedId = sessionStorage.getItem('ws_client_id');
     if (!savedId) {
       // TODO: получение ID с сервера
@@ -23,11 +24,8 @@ export const Main: React.FC = () => {
       sessionStorage.setItem('ws_client_id', savedId);
     }
     setClientId(savedId);
-
-    // Подключаемся к WebSocket
     connectWebSocket(savedId);
 
-    // Отключаемся при размонтировании компонента
     return () => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.close();
@@ -35,7 +33,6 @@ export const Main: React.FC = () => {
     };
   }, []);
 
-  // Функция подключения к WebSocket
   const connectWebSocket = (id: string) => {
     // Определяем WebSocket URL (используем текущий хост)
     // TODO: динамическое получение порта с сервера
@@ -61,8 +58,21 @@ export const Main: React.FC = () => {
             setMessage(`✅ ${data.message} (Всего клиентов: ${data.clients_count})`);
             break;
 
-          case 'broadcast':
-            setMessage(`📢 Broadcast: ${data.message}`);
+          case 'create_game':
+            // Обработка сообщений от сервера для создания игры
+            if (data.subtype) {
+              setGameCreationStep(data.subtype);
+              if (data.subtype !== 'create_game_finish') {
+                setShowCreateGame(true);
+              }
+            }
+            if (data.message) {
+              setMessage(data.message);
+            }
+            break;
+
+          case 'not_admin':
+            setMessage(`⛔ ${data.message || 'Доступ запрещён. Только для администратора.'}`);
             break;
 
           case 'message':
@@ -81,20 +91,9 @@ export const Main: React.FC = () => {
             );
             break;
 
-          case 'create_game_accept':
-            setMessage(`✅ Запрос на создание игры принят...`);
-            break;
-
           default:
             setMessage(`📨 Получено: ${JSON.stringify(data)}`);
         }
-
-        // // Через 5 секунд очищаем сообщение (опционально)
-        // setTimeout(() => {
-        //   // if (message === setMessage) {
-        //   //   // Не очищаем если это последнее сообщение
-        //   // }
-        // }, 5000);
       } catch (error) {
         console.error('Ошибка парсинга сообщения:', error);
         setMessage(`Получено: ${event.data}`);
@@ -124,14 +123,15 @@ export const Main: React.FC = () => {
     wsRef.current = websocket;
   };
 
-  // Функция для отправки сообщения через WebSocket
-  const sendWebSocketMessage = (type: string, content?: any) => {
+  const sendWebSocketMessage = (type: string, subtype?: string, content?: any) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      const message = {
+      const message: any = {
         type: type,
-        content: content,
         timestamp: new Date().toISOString(),
       };
+      if (subtype) message.subtype = subtype;
+      if (content) Object.assign(message, content);
+
       wsRef.current.send(JSON.stringify(message));
       console.log('Отправлено:', message);
     } else {
@@ -141,51 +141,43 @@ export const Main: React.FC = () => {
   };
 
   const handleCreateGame = () => {
-    sendWebSocketMessage('create_game');
-    setMessage('🎮 Создание игры...');
-    // TODO: Остальная логика
+    sendWebSocketMessage('create_game', 'create_game');
+    setShowCreateGame(true);
   };
 
   const handleSumUpResults = () => {
-    sendWebSocketMessage('sum_up_results', { action: 'sum_up' });
+    sendWebSocketMessage('sum_up_results', 'sum_up');
     setMessage('📊 Подведение итогов...');
-    // TODO
   };
 
   const handleEnterResults = () => {
-    sendWebSocketMessage('enter_results', { action: 'enter' });
+    sendWebSocketMessage('enter_results', 'enter');
     setMessage('✏️ Ввод результатов...');
-    // TODO
   };
 
   const handleEdit = () => {
-    sendWebSocketMessage('edit', { action: 'edit' });
+    sendWebSocketMessage('edit', 'edit');
     setMessage('📝 Редактирование...');
-    // TODO
   };
 
   const handleStatus = () => {
-    sendWebSocketMessage('status', { action: 'status' });
+    sendWebSocketMessage('status', 'status');
     setMessage('ℹ️ Запрос статуса...');
-    // TODO
   };
 
   const handleRemovePlayer = () => {
-    sendWebSocketMessage('remove_player', { action: 'remove' });
+    sendWebSocketMessage('remove_player', 'remove');
     setMessage('🗑️ Удаление игрока...');
-    // TODO
   };
 
   const handleDraw = () => {
-    sendWebSocketMessage('draw', { action: 'draw' });
+    sendWebSocketMessage('draw', 'draw');
     setMessage('🎲 Жеребьёвка...');
-    // TODO
   };
 
   const handleRoundsData = () => {
-    sendWebSocketMessage('rounds_data', { action: 'get_rounds' });
+    sendWebSocketMessage('rounds_data', 'get_rounds');
     setMessage('📋 Запрос данных туров...');
-    // TODO
   };
 
   const logout = () => {
@@ -262,6 +254,18 @@ export const Main: React.FC = () => {
       </div>
 
       <ButtonsList buttonClassName="w-74 py-2 h-auto" buttons={buttons} />
+
+      {/* Диалог создания игры */}
+      {showCreateGame && (
+        <CreateGameDialog
+          onClose={() => {
+            setShowCreateGame(false);
+            setGameCreationStep(null);
+          }}
+          sendMessage={sendWebSocketMessage}
+          currentStep={gameCreationStep}
+        />
+      )}
     </div>
   );
 };
