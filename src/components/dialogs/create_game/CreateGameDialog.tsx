@@ -115,7 +115,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   };
 
   return (
-    <div className="w-96 max-w-full rounded-lg bg-gray-800 p-6">
+    <div>
       {renderStep()}
       {error && (
         <div className="mt-4 rounded bg-red-900 p-2 text-sm text-red-200">
