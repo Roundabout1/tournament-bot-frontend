@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreateGameStep } from '../types/CreateGameStep';
+import { CreateGameStep } from '../../../types/CreateGameStep';
 
 interface CreateGameDialogProps {
   onClose: () => void;

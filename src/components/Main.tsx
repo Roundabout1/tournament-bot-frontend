@@ -1,6 +1,6 @@
 import { Title } from './Title';
 import { useState, useEffect, useRef } from 'react';
-import { CreateGameDialog } from './CreateGameDialog';
+import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
 import { CreateGameStep } from '../types/CreateGameStep';
