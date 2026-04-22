@@ -143,7 +143,7 @@ export const Main: React.FC = () => {
 
   const addLog = (msg: string, fromServer: boolean) => {
     setMessage(msg);
-    if (fromServer){
+    if (fromServer) {
       // TODO
     }
   };
@@ -158,6 +158,31 @@ export const Main: React.FC = () => {
     sessionStorage.clear();
     // TODO: Перенаправление на страницу логина
     window.location.reload();
+  };
+
+  const renderLayout = () => {
+    switch (layout) {
+      case 'main':
+        return (
+          <MainMenu
+            addLog={addLog}
+            isAdmin={IsAdmin}
+            sendWebSocketMessage={sendWebSocketMessage}
+            switchLayout={switchLayout}
+          />
+        );
+      case 'create_game':
+        return (
+          <CreateGameDialog
+            onClose={() => {
+              setLayout('main');
+              setGameCreationStep(null);
+            }}
+            sendMessage={sendWebSocketMessage}
+            currentStep={gameCreationStep}
+          />
+        );
+    }
   };
 
   return (
@@ -186,25 +211,7 @@ export const Main: React.FC = () => {
           <span className="text-red-400">○ Нет подключения к серверу</span>
         )}
       </div>
-
-      <MainMenu
-        addLog={addLog}
-        isAdmin={IsAdmin}
-        sendWebSocketMessage={sendWebSocketMessage}
-        switchLayout={switchLayout}
-      />
-
-      {/* Диалог создания игры */}
-      {layout === 'create_game' && (
-        <CreateGameDialog
-          onClose={() => {
-            setLayout('main');
-            setGameCreationStep(null);
-          }}
-          sendMessage={sendWebSocketMessage}
-          currentStep={gameCreationStep}
-        />
-      )}
+      {renderLayout()}
     </div>
   );
 };
