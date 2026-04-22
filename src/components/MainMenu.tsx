@@ -90,5 +90,5 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       action: handleRoundsData,
     },
   ];
-  return <ButtonsList buttonClassName="w-74 py-2 h-auto" buttons={buttons} />;
+  return <ButtonsList buttonClassName="w-96 py-2 h-auto" buttons={buttons} />;
 };

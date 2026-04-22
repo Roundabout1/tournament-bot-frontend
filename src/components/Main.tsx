@@ -195,15 +195,6 @@ export const Main: React.FC = () => {
         Выйти
       </button>
       <Title />
-      <div
-        className={twMerge(
-          'h-32 w-74 rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
-          message === null && 'text-gray-500',
-        )}
-      >
-        {message === null ? 'Ответ от сервера...' : message}
-      </div>
-
       {/* Индикатор статуса подключения */}
       <div className="text-sm text-gray-400">
         {isConnected ? (
@@ -211,6 +202,14 @@ export const Main: React.FC = () => {
         ) : (
           <span className="text-red-400">○ Нет подключения к серверу</span>
         )}
+      </div>
+      <div
+        className={twMerge(
+          'h-80 w-96 rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
+          message === null && 'text-gray-500',
+        )}
+      >
+        {message === null ? 'Ответ от сервера...' : message}
       </div>
       {renderLayout()}
     </div>

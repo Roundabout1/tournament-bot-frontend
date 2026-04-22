@@ -360,11 +360,9 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-      <div className="w-96 max-w-full rounded-lg bg-gray-800 p-6">
-        {renderStep()}
-        {error && <div className="mt-4 rounded bg-red-900 p-2 text-sm text-red-200">{error}</div>}
-      </div>
+    <div className="w-96 max-w-full rounded-lg bg-gray-800 p-6">
+      {renderStep()}
+      {error && <div className="mt-4 rounded bg-red-900 p-2 text-sm text-red-200">{error}</div>}
     </div>
   );
 };
