@@ -18,7 +18,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleSumUpResults = () => {
-    sendWebSocketMessage('sum_up_results', 'sum_up');
+    sendWebSocketMessage('game_info', 'sum_up_results');
   };
 
   const handleEnterResults = () => {
