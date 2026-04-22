@@ -6,6 +6,7 @@ import { MainMenu } from './MainMenu';
 import { CreateGameStep } from '../types/CreateGameStep';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
+import { getCommandText } from '../types/CommandTexts';
 
 export const Main: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -157,7 +158,7 @@ export const Main: React.FC = () => {
       console.log('Отправлено:', message);
 
       // Добавляем сообщение о команде в чат
-      const commandText = getCommandText(type, subtype);
+      const commandText = getCommandText(type, subtype, content);
       if (commandText) {
         addChatMessage(commandText, 'user', 'Вы');
       }
@@ -165,21 +166,6 @@ export const Main: React.FC = () => {
       console.warn('WebSocket не подключен');
       addChatMessage('Нет соединения с сервером', 'error');
     }
-  };
-
-  // Вспомогательная функция для отображения текста команды
-  const getCommandText = (type: string, subtype?: string): string | null => {
-    if (type === 'create_game') {
-      switch (subtype) {
-        case 'create_game':
-          return '📋 Начать создание новой игры';
-        case 'cancel_create_game':
-          return '❌ Создание игры отменено';
-        default:
-          return null;
-      }
-    }
-    return null;
   };
 
   const switchLayout = (layout: Layout) => setLayout(layout);
@@ -200,7 +186,6 @@ export const Main: React.FC = () => {
       case 'main':
         return (
           <MainMenu
-            addChatMessage={addChatMessage}
             isAdmin={IsAdmin}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
@@ -224,46 +209,44 @@ export const Main: React.FC = () => {
 
   return (
     <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
-  {/* Верхняя панель */}
-  <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
-    <Title />
-    <button
-      className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
-      onClick={logout}
-    >
-      Выйти
-    </button>
-  </div>
+      {/* Верхняя панель */}
+      <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
+        <Title />
+        <button
+          className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
+          onClick={logout}
+        >
+          Выйти
+        </button>
+      </div>
 
-  {/* Статус подключения */}
-  <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-2">
-    <div className="text-sm">
-      {isConnected ? (
-        <span className="text-green-400">● Подключено к серверу</span>
-      ) : (
-        <span className="text-red-400">○ Нет подключения к серверу</span>
-      )}
-    </div>
-    <div className="text-xs text-gray-500">ID: {clientId}</div>
-  </div>
+      {/* Статус подключения */}
+      <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-2">
+        <div className="text-sm">
+          {isConnected ? (
+            <span className="text-green-400">● Подключено к серверу</span>
+          ) : (
+            <span className="text-red-400">○ Нет подключения к серверу</span>
+          )}
+        </div>
+        <div className="text-xs text-gray-500">ID: {clientId}</div>
+      </div>
 
-  {/* Основной контент - чат занимает основное пространство */}
-  <div className="flex flex-1 flex-col overflow-hidden bg-gray-800">
-    {/* Заголовок чата */}
-    <div className="border-b border-gray-700 px-4 py-2">
-      <h3 className="text-sm font-semibold text-gray-300">Системные сообщения</h3>
-    </div>
-    
-    {/* Область сообщений - растягивается на всё доступное пространство */}
-    <div className="flex-1 overflow-hidden">
-      <ChatLog messages={messages} />
-    </div>
-  </div>
+      {/* Основной контент - чат занимает основное пространство */}
+      <div className="flex flex-1 flex-col overflow-hidden bg-gray-800">
+        {/* Заголовок чата */}
+        <div className="border-b border-gray-700 px-4 py-2">
+          <h3 className="text-sm font-semibold text-gray-300">Системные сообщения</h3>
+        </div>
 
-  {/* Нижняя панель - меню */}
-  <div className="border-t border-gray-700 bg-gray-900 p-4">
-    {renderLayout()}
-  </div>
-</div>
+        {/* Область сообщений - растягивается на всё доступное пространство */}
+        <div className="flex-1 overflow-hidden">
+          <ChatLog messages={messages} />
+        </div>
+      </div>
+
+      {/* Нижняя панель - меню */}
+      <div className="border-t border-gray-700 bg-gray-900 p-4">{renderLayout()}</div>
+    </div>
   );
 };
