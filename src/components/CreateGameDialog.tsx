@@ -1,29 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { CreateGameStep } from '../types/CreateGameStep';
 
 interface CreateGameDialogProps {
   onClose: () => void;
   sendMessage: (type: string, subtype: string, content?: any) => void;
-  currentStep: string | null;
+  currentStep: CreateGameStep | null;
 }
-
-type Step =
-  | 'entry_players_count'
-  | 'entry_shuffle_type'
-  | 'set_multi_tour_group_size'
-  | 'set_multiplier'
-  | 'entry_tours_count'
-  | 'entry_is_asymmetric'
-  | 'entry_has_game_fine'
-  | 'create_game_finish'
-  | 'confirm_new_game'
-  | 'entry_error';
 
 export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   onClose,
   sendMessage,
   currentStep,
 }) => {
-  const [step, setStep] = useState<Step>('entry_players_count');
   const [playersCount, setPlayersCount] = useState<number>(4);
   const [shuffleType, setShuffleType] = useState<string>('');
   const [groupSize, setGroupSize] = useState<number>(2);
@@ -33,12 +21,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   const [hasFines, setHasFines] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [suggestedTours] = useState<number>(3);
-
-  useEffect(() => {
-    if (currentStep) {
-      setStep(currentStep as Step);
-    }
-  }, [currentStep]);
 
   const handleCancel = () => {
     sendMessage('create_game', 'cancel_create_game');
@@ -112,7 +94,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   };
 
   const renderStep = () => {
-    switch (step) {
+    switch (currentStep) {
       case 'confirm_new_game':
         return (
           <div className="space-y-4">

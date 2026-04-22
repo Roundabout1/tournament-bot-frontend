@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge';
 import { CreateGameDialog } from './CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
+import { CreateGameStep } from '../types/CreateGameStep';
 /*** 
 Основной интерфейс
 */
@@ -12,7 +13,7 @@ export const Main: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [clientId, setClientId] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
-  const [gameCreationStep, setGameCreationStep] = useState<string | null>(null);
+  const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
   // TODO: разграничение пользователей на админов и судей
   const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
@@ -68,7 +69,7 @@ export const Main: React.FC = () => {
               }
             }
             if (data.message) {
-              setMessage(data.message);
+              addLog(data.message, true);
             }
             break;
 
