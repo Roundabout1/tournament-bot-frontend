@@ -22,6 +22,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   sendMessage,
   currentStep,
 }) => {
+  // FIXME: no set?
   const [error] = useState<string | null>(null);
 
   const handleSendMessage = (subtype: string, content?: any) => {
@@ -30,7 +31,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
 
   const handleCancel = () => {
     handleSendMessage('cancel_create_game');
-    onClose();
   };
 
   const renderStep = () => {
@@ -93,10 +93,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
 
       case 'entry_has_game_fine':
         return (
-          <Fines
-            onNext={(data) => handleSendMessage('fines', data)}
-            onCancel={handleCancel}
-          />
+          <Fines onNext={(data) => handleSendMessage('fines', data)} onCancel={handleCancel} />
         );
 
       case 'create_game_finish':
@@ -104,6 +101,10 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
 
       case 'entry_error':
         return <Error onClose={onClose} />;
+
+      case 'cancel_game_creation':
+        onClose();
+        return;
 
       default:
         return (
@@ -117,11 +118,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   return (
     <div>
       {renderStep()}
-      {error && (
-        <div className="mt-4 rounded bg-red-900 p-2 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <div className="mt-4 rounded bg-red-900 p-2 text-sm text-red-200">{error}</div>}
     </div>
   );
 };

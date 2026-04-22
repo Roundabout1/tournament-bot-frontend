@@ -8,4 +8,5 @@ export type CreateGameStep =
   | 'entry_has_game_fine'
   | 'create_game_finish'
   | 'confirm_new_game'
-  | 'entry_error';
+  | 'entry_error'
+  | 'cancel_game_creation';
