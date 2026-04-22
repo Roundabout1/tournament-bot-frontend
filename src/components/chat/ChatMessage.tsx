@@ -11,7 +11,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     switch (message.type) {
       case 'user':
         return {
-          container: 'justify-end',
+          // justify-end
+          container: 'justify-start',
           bubble: 'bg-blue-600 text-white rounded-br-none',
           icon: '💬',
         };

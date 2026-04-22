@@ -172,7 +172,7 @@ export const Main: React.FC = () => {
     if (type === 'create_game') {
       switch (subtype) {
         case 'create_game':
-          return '📋 Начато создание новой игры';
+          return '📋 Начать создание новой игры';
         case 'cancel_create_game':
           return '❌ Создание игры отменено';
         default:
