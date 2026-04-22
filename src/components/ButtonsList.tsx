@@ -40,10 +40,9 @@ export const ButtonsList: React.FC<ButtonsListProps> = ({
       directionClass,
       alignmentClasses[alignment],
     )}>
-      {visibleButtons.map((button, index) => (
+      {visibleButtons.map((button) => (
         <Button
-          key={index}
-          className={buttonClassName}
+          className={buttonClassName ?? 'w-96 py-2 h-auto'}
           onClick={button.action}
           text={button.text}
         />
