@@ -116,6 +116,10 @@ export const Main: React.FC = () => {
             addChatMessage(data.message, 'error');
             break;
 
+          case 'event':
+            addChatMessage(data.message, 'system');
+            break;
+
           default:
             addChatMessage(`Получено: ${JSON.stringify(data)}`, 'server', 'Сервер');
         }
