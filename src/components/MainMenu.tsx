@@ -1,17 +1,18 @@
 import { Layout } from '../types/Layout';
+import { MessageType } from '../types/Message';
 import { ButtonsList } from './ButtonsList';
 
 interface MainMenuProps {
   //onClose: () => void;
   sendWebSocketMessage: (type: string, subtype: string, content?: any) => void;
-  addLog: (msg: string, fromServer: boolean) => void;
+  addChatMessage: (text: string, type: MessageType, sender?: string) => void;
   switchLayout: (layout: Layout) => void;
   isAdmin: boolean;
 }
 
 export const MainMenu: React.FC<MainMenuProps> = ({
   sendWebSocketMessage,
-  addLog,
+  addChatMessage,
   switchLayout,
   isAdmin,
 }) => {
@@ -22,37 +23,37 @@ export const MainMenu: React.FC<MainMenuProps> = ({
 
   const handleSumUpResults = () => {
     sendWebSocketMessage('sum_up_results', 'sum_up');
-    addLog('📊 Подведение итогов...', false);
+    addChatMessage('📊 Подведение итогов...', "user");
   };
 
   const handleEnterResults = () => {
     sendWebSocketMessage('enter_results', 'enter');
-    addLog('✏️ Ввод результатов...', false);
+    addChatMessage('✏️ Ввод результатов...', "user");
   };
 
   const handleEdit = () => {
     sendWebSocketMessage('edit', 'edit');
-    addLog('📝 Редактирование...', false);
+    addChatMessage('📝 Редактирование...', "user");
   };
 
   const handleStatus = () => {
     sendWebSocketMessage('status', 'status');
-    addLog('ℹ️ Запрос статуса...', false);
+    addChatMessage('ℹ️ Запрос статуса...', "user");
   };
 
   const handleRemovePlayer = () => {
     sendWebSocketMessage('remove_player', 'remove');
-    addLog('🗑️ Удаление игрока...', false);
+    addChatMessage('🗑️ Удаление игрока...', "user");
   };
 
   const handleDraw = () => {
     sendWebSocketMessage('draw', 'draw');
-    addLog('🎲 Жеребьёвка...', false);
+    addChatMessage('🎲 Жеребьёвка...', "user");
   };
 
   const handleRoundsData = () => {
     sendWebSocketMessage('rounds_data', 'get_rounds');
-    addLog('📋 Запрос данных туров...', false);
+    addChatMessage('📋 Запрос данных туров...', "user");
   };
 
   const buttons = [

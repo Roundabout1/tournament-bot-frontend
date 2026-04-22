@@ -1,22 +1,32 @@
 import { Title } from './Title';
 import { useState, useEffect, useRef } from 'react';
-import { twMerge } from 'tailwind-merge';
 import { CreateGameDialog } from './CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
 import { CreateGameStep } from '../types/CreateGameStep';
-/*** 
-Основной интерфейс
-*/
+import { Message } from '../types/Message';
+import { ChatLog } from './chat/ChatLog';
+
 export const Main: React.FC = () => {
-  const [message, setMessage] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [clientId, setClientId] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
-  // TODO: разграничение пользователей на админов и судей
   const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
+
+  /** Функция для добавления сообщения*/
+  const addChatMessage = (text: string, type: Message['type'] = 'system', sender?: string) => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      type,
+      text,
+      timestamp: new Date(),
+      sender,
+    };
+    setMessages((prev) => [...prev, newMessage]);
+  };
 
   useEffect(() => {
     let savedId = sessionStorage.getItem('ws_client_id');
@@ -27,6 +37,9 @@ export const Main: React.FC = () => {
     }
     setClientId(savedId);
     connectWebSocket(savedId);
+
+    // Добавляем приветственное сообщение
+    addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
 
     return () => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -44,7 +57,7 @@ export const Main: React.FC = () => {
     websocket.onopen = () => {
       console.log('WebSocket подключен');
       setIsConnected(true);
-      setMessage('Подключение установлено...');
+      addChatMessage('Соединение с сервером установлено', 'system');
     };
 
     // обработка входящих сообщений
@@ -56,8 +69,11 @@ export const Main: React.FC = () => {
         // Обрабатываем разные типы сообщений
         switch (data.type) {
           case 'connection':
-            // Это подтверждение подключения от сервера
-            setMessage(`✅ ${data.message} (Всего клиентов: ${data.clients_count})`);
+            addChatMessage(
+              `${data.message} (Всего клиентов: ${data.clients_count})`,
+              'server',
+              'Сервер',
+            );
             break;
 
           case 'create_game':
@@ -69,54 +85,57 @@ export const Main: React.FC = () => {
               }
             }
             if (data.message) {
-              addLog(data.message, true);
+              addChatMessage(data.message, 'server', 'Сервер');
             }
             break;
 
           case 'not_admin':
-            setMessage(`⛔ ${data.message || 'Доступ запрещён. Только для администратора.'}`);
+            addChatMessage(data.message || 'Доступ запрещён. Только для администратора.', 'error');
             break;
 
           case 'message':
-            setMessage(`💬 ${data.client_id}: ${data.message}`);
+            addChatMessage(data.message, 'user', data.client_id);
             break;
 
           case 'user_joined':
-            setMessage(
-              `👤 Пользователь ${data.client_id} присоединился (Всего: ${data.clients_count})`,
+            addChatMessage(
+              `Пользователь ${data.client_id} присоединился (Всего: ${data.clients_count})`,
+              'system',
             );
             break;
 
           case 'user_left':
-            setMessage(
-              `👋 Пользователь ${data.client_id} покинул чат (Осталось: ${data.clients_count})`,
+            addChatMessage(
+              `Пользователь ${data.client_id} покинул чат (Осталось: ${data.clients_count})`,
+              'system',
             );
             break;
 
           default:
-            setMessage(`📨 Получено: ${JSON.stringify(data)}`);
+            addChatMessage(`Получено: ${JSON.stringify(data)}`, 'server', 'Сервер');
         }
       } catch (error) {
         console.error('Ошибка парсинга сообщения:', error);
-        setMessage(`Получено: ${event.data}`);
+        addChatMessage(`Ошибка обработки сообщения: ${event.data}`, 'error');
       }
     };
 
     websocket.onerror = (error) => {
       console.error('WebSocket ошибка:', error);
-      setMessage('❌ Ошибка подключения к WebSocket');
+      addChatMessage('Ошибка подключения к WebSocket', 'error');
       setIsConnected(false);
     };
 
     websocket.onclose = () => {
       console.log('WebSocket отключен');
       setIsConnected(false);
-      setMessage('⚠️ Соединение с сервером разорвано');
+      addChatMessage('Соединение с сервером разорвано', 'error');
 
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
+          addChatMessage('Попытка переподключения...', 'system');
           connectWebSocket(clientId);
         }
       }, 3000);
@@ -136,29 +155,44 @@ export const Main: React.FC = () => {
 
       wsRef.current.send(JSON.stringify(message));
       console.log('Отправлено:', message);
+
+      // Добавляем сообщение о команде в чат
+      const commandText = getCommandText(type, subtype);
+      if (commandText) {
+        addChatMessage(commandText, 'user', 'Вы');
+      }
     } else {
       console.warn('WebSocket не подключен');
-      setMessage('⚠️ Нет соединения с сервером');
+      addChatMessage('Нет соединения с сервером', 'error');
     }
   };
 
-  const addLog = (msg: string, fromServer: boolean) => {
-    setMessage(msg);
-    if (fromServer) {
-      // TODO
+  // Вспомогательная функция для отображения текста команды
+  const getCommandText = (type: string, subtype?: string): string | null => {
+    if (type === 'create_game') {
+      switch (subtype) {
+        case 'create_game':
+          return '📋 Начато создание новой игры';
+        case 'cancel_create_game':
+          return '❌ Создание игры отменено';
+        default:
+          return null;
+      }
     }
+    return null;
   };
 
   const switchLayout = (layout: Layout) => setLayout(layout);
 
   const logout = () => {
-    // Закрываем WebSocket соединение
     if (wsRef.current) {
       wsRef.current.close();
     }
     sessionStorage.clear();
-    // TODO: Перенаправление на страницу логина
-    window.location.reload();
+    addChatMessage('Вы вышли из системы', 'system');
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const renderLayout = () => {
@@ -166,7 +200,7 @@ export const Main: React.FC = () => {
       case 'main':
         return (
           <MainMenu
-            addLog={addLog}
+            addChatMessage={addChatMessage}
             isAdmin={IsAdmin}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
@@ -183,35 +217,53 @@ export const Main: React.FC = () => {
             currentStep={gameCreationStep}
           />
         );
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="flex h-[100vh] w-[100wh] flex-col place-content-center items-center gap-2 bg-gray-700">
-      <button
-        className="absolute top-3 right-7 h-8 w-24 cursor-pointer rounded border border-none bg-[#324ab2] text-gray-200"
-        onClick={logout}
-      >
-        Выйти
-      </button>
-      <Title />
-      {/* Индикатор статуса подключения */}
-      <div className="text-sm text-gray-400">
-        {isConnected ? (
-          <span className="text-green-400">● Подключено к серверу (ID: {clientId})</span>
-        ) : (
-          <span className="text-red-400">○ Нет подключения к серверу</span>
-        )}
-      </div>
-      <div
-        className={twMerge(
-          'h-80 w-96 rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
-          message === null && 'text-gray-500',
-        )}
-      >
-        {message === null ? 'Ответ от сервера...' : message}
-      </div>
-      {renderLayout()}
+    <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
+  {/* Верхняя панель */}
+  <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
+    <Title />
+    <button
+      className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
+      onClick={logout}
+    >
+      Выйти
+    </button>
+  </div>
+
+  {/* Статус подключения */}
+  <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-2">
+    <div className="text-sm">
+      {isConnected ? (
+        <span className="text-green-400">● Подключено к серверу</span>
+      ) : (
+        <span className="text-red-400">○ Нет подключения к серверу</span>
+      )}
     </div>
+    <div className="text-xs text-gray-500">ID: {clientId}</div>
+  </div>
+
+  {/* Основной контент - чат занимает основное пространство */}
+  <div className="flex flex-1 flex-col overflow-hidden bg-gray-800">
+    {/* Заголовок чата */}
+    <div className="border-b border-gray-700 px-4 py-2">
+      <h3 className="text-sm font-semibold text-gray-300">Системные сообщения</h3>
+    </div>
+    
+    {/* Область сообщений - растягивается на всё доступное пространство */}
+    <div className="flex-1 overflow-hidden">
+      <ChatLog messages={messages} />
+    </div>
+  </div>
+
+  {/* Нижняя панель - меню */}
+  <div className="border-t border-gray-700 bg-gray-900 p-4">
+    {renderLayout()}
+  </div>
+</div>
   );
 };
