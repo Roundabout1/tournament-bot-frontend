@@ -39,7 +39,8 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
         return (
           <ConfirmNewGame
             onNext={(data) => handleSendMessage('confirm_new_game', data)}
-            onCancel={handleCancel}
+            // FIXME: костыль, иначе придёт двойное сообщение об отмене с сервера
+            onCancel={() => console.log('on cancel')}
           />
         );
 
