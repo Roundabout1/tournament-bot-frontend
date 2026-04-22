@@ -1,8 +1,9 @@
-import { ButtonsList } from './ButtonsList';
 import { Title } from './Title';
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { CreateGameDialog } from './CreateGameDialog';
+import { Layout } from '../types/Layout';
+import { MainMenu } from './MainMenu';
 /*** 
 Основной интерфейс
 */
@@ -10,7 +11,7 @@ export const Main: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [clientId, setClientId] = useState<string>('');
-  const [showCreateGame, setShowCreateGame] = useState(false);
+  const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<string | null>(null);
   // TODO: разграничение пользователей на админов и судей
   const IsAdmin = true;
@@ -63,7 +64,7 @@ export const Main: React.FC = () => {
             if (data.subtype) {
               setGameCreationStep(data.subtype);
               if (data.subtype !== 'create_game_finish') {
-                setShowCreateGame(true);
+                setLayout('create_game');
               }
             }
             if (data.message) {
@@ -140,45 +141,14 @@ export const Main: React.FC = () => {
     }
   };
 
-  const handleCreateGame = () => {
-    sendWebSocketMessage('create_game', 'create_game');
-    setShowCreateGame(true);
+  const addLog = (msg: string, fromServer: boolean) => {
+    setMessage(msg);
+    if (fromServer){
+      // TODO
+    }
   };
 
-  const handleSumUpResults = () => {
-    sendWebSocketMessage('sum_up_results', 'sum_up');
-    setMessage('📊 Подведение итогов...');
-  };
-
-  const handleEnterResults = () => {
-    sendWebSocketMessage('enter_results', 'enter');
-    setMessage('✏️ Ввод результатов...');
-  };
-
-  const handleEdit = () => {
-    sendWebSocketMessage('edit', 'edit');
-    setMessage('📝 Редактирование...');
-  };
-
-  const handleStatus = () => {
-    sendWebSocketMessage('status', 'status');
-    setMessage('ℹ️ Запрос статуса...');
-  };
-
-  const handleRemovePlayer = () => {
-    sendWebSocketMessage('remove_player', 'remove');
-    setMessage('🗑️ Удаление игрока...');
-  };
-
-  const handleDraw = () => {
-    sendWebSocketMessage('draw', 'draw');
-    setMessage('🎲 Жеребьёвка...');
-  };
-
-  const handleRoundsData = () => {
-    sendWebSocketMessage('rounds_data', 'get_rounds');
-    setMessage('📋 Запрос данных туров...');
-  };
+  const switchLayout = (layout: Layout) => setLayout(layout);
 
   const logout = () => {
     // Закрываем WebSocket соединение
@@ -189,42 +159,6 @@ export const Main: React.FC = () => {
     // TODO: Перенаправление на страницу логина
     window.location.reload();
   };
-
-  const buttons = [
-    {
-      text: 'Создать игру',
-      action: handleCreateGame,
-      hidden: !IsAdmin,
-    },
-    {
-      text: 'Подвести итоги',
-      action: handleSumUpResults,
-    },
-    {
-      text: 'Ввести результат',
-      action: handleEnterResults,
-    },
-    {
-      text: 'Ред.',
-      action: handleEdit,
-    },
-    {
-      text: 'Статус',
-      action: handleStatus,
-    },
-    {
-      text: 'Удалить игрока',
-      action: handleRemovePlayer,
-    },
-    {
-      text: 'Жеребьёвка',
-      action: handleDraw,
-    },
-    {
-      text: 'Данные туров',
-      action: handleRoundsData,
-    },
-  ];
 
   return (
     <div className="flex h-[100vh] w-[100wh] flex-col place-content-center items-center gap-2 bg-gray-700">
@@ -253,13 +187,18 @@ export const Main: React.FC = () => {
         )}
       </div>
 
-      <ButtonsList buttonClassName="w-74 py-2 h-auto" buttons={buttons} />
+      <MainMenu
+        addLog={addLog}
+        isAdmin={IsAdmin}
+        sendWebSocketMessage={sendWebSocketMessage}
+        switchLayout={switchLayout}
+      />
 
       {/* Диалог создания игры */}
-      {showCreateGame && (
+      {layout === 'create_game' && (
         <CreateGameDialog
           onClose={() => {
-            setShowCreateGame(false);
+            setLayout('main');
             setGameCreationStep(null);
           }}
           sendMessage={sendWebSocketMessage}
