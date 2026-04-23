@@ -91,32 +91,10 @@ export const Main: React.FC = () => {
             break;
 
           case 'game_info':
-            if (data.subtype === 'results_file' || data.subtype === 'rounds_data_file') {
-              // Обработка файла
-              if (data.message && data.message.startsWith('file:')) {
-                const [_, filename, base64Data] = data.message.split(':');
-                const byteCharacters = atob(base64Data);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                  byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], {
-                  type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                });
-
-                // Создаём ссылку для скачивания
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                addChatMessage(`📎 Файл "${filename}" готов к скачиванию`, 'server', 'Сервер');
-              }
+            if (data.subtype === 'sum_up_results' || data.subtype === 'rounds_data') {
+              var filename = data.message
+              var what = data.subtype === 'sum_up_results' ? 'Итоги' : 'Данные туров'
+              addChatMessage(`📎 ${what} сохранены в файле "${filename}"`, 'server', 'Сервер');
             } else if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
             }
