@@ -1,5 +1,3 @@
-// types/CommandTexts.ts
-
 export interface CommandParams {
   [key: string]: any;
 }
@@ -14,10 +12,6 @@ export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
     'create_game': {
       text: '📋 Начать создание новой игры',
     },
-    // сервер и так отправит сообщение  о том, что создание игры отменено, так что не надо
-    // 'cancel_create_game': {
-    //   text: '❌ Отменить создание игры',
-    // },
     'confirm_new_game': {
       format: (params) => params.confirm 
         ? '✅ Подтверждено создание новой игры'
@@ -58,9 +52,18 @@ export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
         : '✅ Штрафы в игре отсутствуют',
     },
   },
-  sum_up_results: {
-    'sum_up': {
+  game_info: {
+    'sum_up_results': {
       text: '📊 Подведение итогов...',
+    },
+    'status': {
+      text: 'ℹ️ Запрос статуса игры...',
+    },
+    'shuffle': {
+      text: '🎲 Жеребьёвка...',
+    },
+    'rounds_data': {
+      text: '📋 Запрос данных туров...',
     },
   },
   enter_results: {
@@ -70,27 +73,12 @@ export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
   },
   edit: {
     'edit': {
-      text: '📝 Редактирование...',
-    },
-  },
-  status: {
-    'status': {
-      text: 'ℹ️ Запрос статуса...',
+      text: '📝 Редактирование результатов...',
     },
   },
   remove_player: {
     'remove': {
       text: '🗑️ Удаление игрока...',
-    },
-  },
-  draw: {
-    'draw': {
-      text: '🎲 Жеребьёвка...',
-    },
-  },
-  rounds_data: {
-    'get_rounds': {
-      text: '📋 Запрос данных туров...',
     },
   },
 };
