@@ -1,4 +1,1 @@
-export type Layout =
-  | 'main'
-  | 'create_game'
-  | 'delete_player'
+export type Layout = 'main' | 'create_game' | 'delete_player' | 'add_results';

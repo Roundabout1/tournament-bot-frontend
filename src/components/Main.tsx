@@ -8,6 +8,7 @@ import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
 import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
+import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 
 export const Main: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -16,6 +17,9 @@ export const Main: React.FC = () => {
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
   const [playerList, setPlayerList] = useState<string[]>([]);
+  const [addResultsTables, setAddResultsTables] = useState<string[]>([]);
+  const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
+  const [addResultsStep, setAddResultsStep] = useState<string>('start');
   const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -122,6 +126,26 @@ export const Main: React.FC = () => {
             switchLayout('delete_player');
             break;
 
+          case 'add_results':
+            if (data.subtype === 'start') {
+              setAddResultsTables(data.tables || []);
+              setAddResultsStep(data.subtype);
+            } else if (data.subtype === 'entry_player_result') {
+              setAddResultsTableInfo({
+                table: data.table,
+                player1: data.player1,
+                player2: data.player2,
+                hasFines: data.has_fines,
+              });
+              setAddResultsStep(data.subtype);
+            } else if (data.subtype === 'finish') {
+              setAddResultsStep(data.subtype);
+            }
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            break;
+
           case 'not_admin':
             addChatMessage(data.message || 'Доступ запрещён. Только для администратора.', 'error');
             break;
@@ -151,11 +175,11 @@ export const Main: React.FC = () => {
           case 'event':
             addChatMessage(data.message, 'system');
             break;
-          
+
           case 'no_game':
             addChatMessage(data.message, 'server');
             break;
-          
+
           case 'game_closed':
             addChatMessage(data.message, 'server');
             break;
@@ -263,6 +287,21 @@ export const Main: React.FC = () => {
               returnToMain();
               setPlayerList([]);
             }}
+          />
+        );
+      case 'add_results':
+        return (
+          <AddResultsDialog
+            onClose={() => {
+              setLayout('main');
+              setAddResultsTables([]);
+              setAddResultsTableInfo(null);
+              setAddResultsStep('start');
+            }}
+            sendMessage={sendWebSocketMessage}
+            step={addResultsStep}
+            tables={addResultsTables}
+            tableInfo={addResultsTableInfo}
           />
         );
       default:
