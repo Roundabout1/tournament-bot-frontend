@@ -30,7 +30,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleStatus = () => {
-    sendWebSocketMessage('status', 'status');
+    sendWebSocketMessage('game_info', 'status');
   };
 
   const handleRemovePlayer = () => {
@@ -38,11 +38,11 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleDraw = () => {
-    sendWebSocketMessage('draw', 'draw');
+    sendWebSocketMessage('game_info', 'shuffle');
   };
 
   const handleRoundsData = () => {
-    sendWebSocketMessage('rounds_data', 'get_rounds');
+    sendWebSocketMessage('game_info', 'rounds_data');
   };
 
   const buttons = [
