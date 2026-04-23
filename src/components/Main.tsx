@@ -7,6 +7,7 @@ import { CreateGameStep } from '../types/CreateGameStep';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
+import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 
 export const Main: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -14,6 +15,7 @@ export const Main: React.FC = () => {
   const [clientId, setClientId] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
+  const [playerList, setPlayerList] = useState<string[]>([]);
   const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -92,12 +94,32 @@ export const Main: React.FC = () => {
 
           case 'game_info':
             if (data.subtype === 'sum_up_results' || data.subtype === 'rounds_data') {
-              var filename = data.message
-              var what = data.subtype === 'sum_up_results' ? 'Итоги' : 'Данные туров'
+              var filename = data.message;
+              var what = data.subtype === 'sum_up_results' ? 'Итоги' : 'Данные туров';
               addChatMessage(`📎 ${what} сохранены в файле "${filename}"`, 'server', 'Сервер');
             } else if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
             }
+            break;
+
+          case 'delete_player':
+            var sub = data.subtype;
+            if (sub != 'list') {
+              console.warn('Ожидается subtype: list');
+              addChatMessage('Ошибка! Получено некорректное сообщение от сервера!', 'error');
+              break;
+            }
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            if (!data.players) {
+              console.warn('Ожидается поле players');
+              addChatMessage('Ошибка! От сервера не пришёл список игроков!', 'error');
+              break;
+            }
+            var players = data.players as string[];
+            setPlayerList(players);
+            switchLayout('delete_player');
             break;
 
           case 'not_admin':
@@ -128,6 +150,14 @@ export const Main: React.FC = () => {
 
           case 'event':
             addChatMessage(data.message, 'system');
+            break;
+          
+          case 'no_game':
+            addChatMessage(data.message, 'server');
+            break;
+          
+          case 'game_closed':
+            addChatMessage(data.message, 'server');
             break;
 
           default:
@@ -199,6 +229,10 @@ export const Main: React.FC = () => {
     }, 500);
   };
 
+  const returnToMain = () => {
+    setLayout('main');
+  };
+
   const renderLayout = () => {
     switch (layout) {
       case 'main':
@@ -213,11 +247,22 @@ export const Main: React.FC = () => {
         return (
           <CreateGameDialog
             onClose={() => {
-              setLayout('main');
+              returnToMain();
               setGameCreationStep(null);
             }}
             sendMessage={sendWebSocketMessage}
             currentStep={gameCreationStep}
+          />
+        );
+      case 'delete_player':
+        return (
+          <DeletePlayerDialog
+            sendMessage={sendWebSocketMessage}
+            players={playerList}
+            onClose={() => {
+              returnToMain();
+              setPlayerList([]);
+            }}
           />
         );
       default:

@@ -76,8 +76,8 @@ export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
       text: '📝 Редактирование результатов...',
     },
   },
-  remove_player: {
-    'remove': {
+  delete_player: {
+    'list': {
       text: '🗑️ Удаление игрока...',
     },
   },

@@ -34,7 +34,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleRemovePlayer = () => {
-    sendWebSocketMessage('remove_player', 'remove');
+    sendWebSocketMessage('delete_player', 'list');
   };
 
   const handleDraw = () => {
