@@ -64,46 +64,63 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
     }
 
     sendMessage('add_results', 'set_status_handler', content);
+    handleCancel();
   };
 
   const handleCancel = () => {
+    setSelectedTable('');
+    setWinner('');
+    setResultState('completed');
+    setHasFines1(false);
+    setHasFines2(false);
+    setError(null);
     onClose();
   };
 
   const renderLoad = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-200">Ввод результатов</h3>
-      <p className="text-gray-300">Загрузка списка столов...</p>
+      <div className="flex items-center justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
+      </div>
+      <p className="text-center text-gray-300">Загрузка списка столов...</p>
     </div>
   );
 
   const renderSelectTableStep = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-200">Выберите стол</h3>
-      <div className="space-y-2">
+      <div className="rounded-lg bg-gray-700 p-4 text-center">
+        <h3 className="text-xl font-semibold text-blue-400">Ввод результатов</h3>
+      </div>
+      <h4 className="text-md font-medium text-gray-300">Выберите стол:</h4>
+      <div className="max-h-64 space-y-2 overflow-y-auto">
         {tables.map((table) => (
-          <label key={table} className="flex items-center space-x-3">
-            <input
-              type="radio"
-              value={table}
-              checked={selectedTable === table}
-              onChange={(e) => setSelectedTable(e.target.value)}
-              className="form-radio text-blue-600"
-            />
-            <span className="text-gray-300">Стол №{table}</span>
-          </label>
+          <div
+            key={table}
+            onClick={() => setSelectedTable(table)}
+            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
+              selectedTable === table
+                ? 'border-blue-500 bg-blue-600 text-white'
+                : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+            }`}
+          >
+            <span className="text-lg font-medium">Стол №{table}</span>
+          </div>
         ))}
       </div>
-      <div className="flex gap-4">
+      {tables.length === 0 && <p className="text-center text-gray-400">Нет доступных столов</p>}
+      <div className="flex gap-4 pt-4">
         <button
           onClick={handleSelectTable}
-          className="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          disabled={!selectedTable}
+          className={`flex-1 rounded-lg px-4 py-2 font-medium text-white transition-colors ${
+            selectedTable ? 'bg-blue-600 hover:bg-blue-700' : 'cursor-not-allowed bg-gray-600'
+          }`}
         >
           Далее
         </button>
         <button
           onClick={handleCancel}
-          className="flex-1 rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+          className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
         >
           Отмена
         </button>
@@ -113,111 +130,111 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
 
   const renderEnterResultStep = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-200">Стол №{tableInfo?.table}</h3>
-      <p className="text-gray-300">
-        Игроки: <strong>{tableInfo?.player1}</strong> vs <strong>{tableInfo?.player2}</strong>
-      </p>
+      {/* Информация о столе */}
+      <div className="rounded-lg bg-gray-700 p-4 text-center">
+        <h3 className="text-xl font-semibold text-blue-400">Стол №{tableInfo?.table}</h3>
+      </div>
 
-      {/* Результат игры */}
+      {/* Выбор победителя / результата */}
+      <h4 className="text-md font-medium text-gray-300">Выберите победителя:</h4>
       <div className="space-y-2">
-        <label className="text-sm text-gray-400">Результат:</label>
-        <div className="space-y-2">
-          <label className="flex items-center space-x-3">
-            <input
-              type="radio"
-              checked={resultState === 'completed'}
-              onChange={() => setResultState('completed')}
-              className="form-radio text-blue-600"
-            />
-            <span className="text-gray-300">Победа/Поражение</span>
-          </label>
-          <label className="flex items-center space-x-3">
-            <input
-              type="radio"
-              checked={resultState === 'draw'}
-              onChange={() => setResultState('draw')}
-              className="form-radio text-blue-600"
-            />
-            <span className="text-gray-300">Ничья</span>
-          </label>
-          <label className="flex items-center space-x-3">
-            <input
-              type="radio"
-              checked={resultState === 'underplayed'}
-              onChange={() => setResultState('underplayed')}
-              className="form-radio text-blue-600"
-            />
-            <span className="text-gray-300">Недоиграно</span>
-          </label>
+        {/* Игрок 1 */}
+        <div
+          onClick={() => {
+            setWinner(tableInfo?.player1 || '');
+            setResultState('completed');
+          }}
+          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
+            winner === tableInfo?.player1 && resultState === 'completed'
+              ? 'border-blue-500 bg-blue-600 text-white'
+              : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+          }`}
+        >
+          <span className="text-xl font-bold">#{tableInfo?.player1}</span>
+        </div>
+
+        {/* Игрок 2 */}
+        <div
+          onClick={() => {
+            setWinner(tableInfo?.player2 || '');
+            setResultState('completed');
+          }}
+          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
+            winner === tableInfo?.player2 && resultState === 'completed'
+              ? 'border-blue-500 bg-blue-600 text-white'
+              : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+          }`}
+        >
+          <span className="text-xl font-bold">#{tableInfo?.player2}</span>
+        </div>
+
+        {/* Ничья */}
+        <div
+          onClick={() => {
+            setWinner('');
+            setResultState('draw');
+          }}
+          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
+            resultState === 'draw'
+              ? 'border-blue-500 bg-blue-600 text-white'
+              : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+          }`}
+        >
+          <span className="text-md">🤝 Ничья</span>
+        </div>
+
+        {/* Недоиграно */}
+        <div
+          onClick={() => {
+            setWinner('');
+            setResultState('underplayed');
+          }}
+          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
+            resultState === 'underplayed'
+              ? 'border-blue-500 bg-blue-600 text-white'
+              : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+          }`}
+        >
+          <span className="text-md">⏸️ Недоиграно</span>
         </div>
       </div>
 
-      {/* Выбор победителя (только для completed) */}
-      {resultState === 'completed' && (
-        <div className="space-y-2">
-          <label className="text-sm text-gray-400">Победитель:</label>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-3">
-              <input
-                type="radio"
-                value={tableInfo?.player1}
-                checked={winner === tableInfo?.player1}
-                onChange={(e) => setWinner(e.target.value)}
-                className="form-radio text-blue-600"
-              />
-              <span className="text-gray-300">Игрок {tableInfo?.player1}</span>
-            </label>
-            <label className="flex items-center space-x-3">
-              <input
-                type="radio"
-                value={tableInfo?.player2}
-                checked={winner === tableInfo?.player2}
-                onChange={(e) => setWinner(e.target.value)}
-                className="form-radio text-blue-600"
-              />
-              <span className="text-gray-300">Игрок {tableInfo?.player2}</span>
-            </label>
-          </div>
-        </div>
-      )}
-
       {/* Штрафы (только если игра их поддерживает) */}
       {tableInfo?.hasFines && (
-        <div className="space-y-2">
-          <label className="text-sm text-gray-400">Штрафы:</label>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                checked={hasFines1}
-                onChange={(e) => setHasFines1(e.target.checked)}
-                className="form-checkbox text-blue-600"
-              />
-              <span className="text-gray-300">Штраф игроку {tableInfo?.player1}</span>
-            </label>
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                checked={hasFines2}
-                onChange={(e) => setHasFines2(e.target.checked)}
-                className="form-checkbox text-blue-600"
-              />
-              <span className="text-gray-300">Штраф игроку {tableInfo?.player2}</span>
-            </label>
-          </div>
+        <div className="mt-4 space-y-2 rounded-lg bg-gray-700/50 p-3">
+          <h5 className="text-sm font-semibold text-gray-300">Штрафы</h5>
+          <label className="flex cursor-pointer items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={hasFines1}
+              onChange={(e) => setHasFines1(e.target.checked)}
+              className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-300">Штраф игроку #{tableInfo?.player1}</span>
+          </label>
+          <label className="flex cursor-pointer items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={hasFines2}
+              onChange={(e) => setHasFines2(e.target.checked)}
+              className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-300">Штраф игроку #{tableInfo?.player2}</span>
+          </label>
         </div>
       )}
 
-      <div className="flex gap-4">
+      {/* Кнопки действий */}
+      <div className="flex gap-4 pt-4">
         <button
           onClick={handleSubmitResult}
-          className="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
         >
-          Подтвердить
+          Отправить результат
         </button>
         <button
           onClick={handleCancel}
-          className="flex-1 rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+          className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
         >
           Отмена
         </button>
@@ -226,6 +243,9 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
   );
 
   const renderStep = () => {
+    if (step === 'start' && tables.length === 0) {
+      return renderLoad();
+    }
     switch (step) {
       case 'start':
         return renderSelectTableStep();
@@ -233,17 +253,19 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
         return renderEnterResultStep();
       case 'finish':
         handleCancel();
-        return;
+        return null;
       default:
         return renderLoad();
     }
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-      <div className="w-96 max-w-full rounded-lg bg-gray-800 p-6">
+    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
+      <div className="w-full max-w-md rounded-lg bg-gray-800 p-6 shadow-xl">
         {renderStep()}
-        {error && <div className="mt-4 rounded bg-red-900 p-2 text-sm text-red-200">{error}</div>}
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-900/50 p-3 text-sm text-red-200">{error}</div>
+        )}
       </div>
     </div>
   );

@@ -296,7 +296,7 @@ export const Main: React.FC = () => {
               setLayout('main');
               setAddResultsTables([]);
               setAddResultsTableInfo(null);
-              setAddResultsStep('start');
+              setAddResultsStep('');
             }}
             sendMessage={sendWebSocketMessage}
             step={addResultsStep}
