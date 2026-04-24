@@ -29,10 +29,19 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
   const [hasFines1, setHasFines1] = useState<boolean>(false);
   const [hasFines2, setHasFines2] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFinished, setHasFinished] = useState<boolean>(false);
 
   useEffect(() => {
     setError(extrenalError);
   }, [extrenalError]);
+
+  // Отдельный эффект для обработки завершения
+  useEffect(() => {
+    if (step === 'finish' && !hasFinished) {
+      setHasFinished(true);
+      handleClose();
+    }
+  }, [step]);
 
   const handleSelectTable = () => {
     if (!selectedTable) {
@@ -74,17 +83,20 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
   };
 
   const handleClose = () => {
+    // Сбрасываем состояние перед закрытием
     setSelectedTable('');
     setWinner('');
     setResultState('completed');
     setHasFines1(false);
     setHasFines2(false);
     setError(null);
+    setHasFinished(false);
     onClose();
   };
 
   const handleCancel = () => {
     sendMessage('add_results', 'cancel');
+    handleClose();
   };
 
   const renderLoad = () => (
@@ -258,7 +270,8 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
     </div>
   );
 
-  const renderStep = () => {
+  // Определяем, какой шаг рендерить (без вызова handleClose во время рендера)
+  const renderStepContent = () => {
     if (step === 'start' && tables.length === 0) {
       return renderLoad();
     }
@@ -267,9 +280,6 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
         return renderSelectTableStep();
       case 'entry_player_result':
         return renderEnterResultStep();
-      case 'finish':
-        handleClose();
-        return null;
       default:
         return renderLoad();
     }
@@ -278,7 +288,7 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
   return (
     <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
       <div className="w-full max-w-md rounded-lg bg-gray-800 p-6 shadow-xl">
-        {renderStep()}
+        {renderStepContent()}
         {error && (
           <div className="mt-4 rounded-lg bg-red-900/50 p-3 text-sm text-red-200">{error}</div>
         )}
