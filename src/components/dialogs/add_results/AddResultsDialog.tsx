@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ResultState } from './GameResult';
 
 interface AddResultsDialogProps {
@@ -12,6 +12,7 @@ interface AddResultsDialogProps {
     player2: string;
     hasFines: boolean;
   } | null;
+  extrenalError: string | null;
 }
 
 export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
@@ -20,6 +21,7 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
   step,
   tables = [],
   tableInfo = null,
+  extrenalError,
 }) => {
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [resultState, setResultState] = useState<ResultState>('completed');
@@ -27,6 +29,10 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
   const [hasFines1, setHasFines1] = useState<boolean>(false);
   const [hasFines2, setHasFines2] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(extrenalError);
+  }, [extrenalError]);
 
   const handleSelectTable = () => {
     if (!selectedTable) {
@@ -64,10 +70,10 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
     }
 
     sendMessage('add_results', 'set_status_handler', content);
-    handleCancel();
+    handleClose();
   };
 
-  const handleCancel = () => {
+  const handleClose = () => {
     setSelectedTable('');
     setWinner('');
     setResultState('completed');
@@ -77,12 +83,22 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
     onClose();
   };
 
+  const handleCancel = () => {
+    sendMessage('add_results', 'cancel');
+  };
+
   const renderLoad = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-center py-8">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
       </div>
       <p className="text-center text-gray-300">Загрузка списка столов...</p>
+      <button
+        onClick={handleCancel}
+        className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
+      >
+        Отмена
+      </button>
     </div>
   );
 
@@ -252,7 +268,7 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
       case 'entry_player_result':
         return renderEnterResultStep();
       case 'finish':
-        handleCancel();
+        handleClose();
         return null;
       default:
         return renderLoad();

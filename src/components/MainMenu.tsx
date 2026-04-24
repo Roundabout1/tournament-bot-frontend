@@ -23,7 +23,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
 
   const handleEnterResults = () => {
     sendWebSocketMessage('add_results', 'start');
-    switchLayout('add_results');
   };
 
   const handleEdit = () => {

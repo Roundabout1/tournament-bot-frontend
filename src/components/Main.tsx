@@ -20,6 +20,7 @@ export const Main: React.FC = () => {
   const [addResultsTables, setAddResultsTables] = useState<string[]>([]);
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
+  const [appError, setAppError] = useState<string | null>(null);
   const IsAdmin = true;
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -130,6 +131,7 @@ export const Main: React.FC = () => {
             if (data.subtype === 'start') {
               setAddResultsTables(data.tables || []);
               setAddResultsStep(data.subtype);
+              switchLayout('add_results');
             } else if (data.subtype === 'entry_player_result') {
               setAddResultsTableInfo({
                 table: data.table,
@@ -170,6 +172,7 @@ export const Main: React.FC = () => {
 
           case 'app_error':
             addChatMessage(data.message, 'error');
+            setAppError(data.message);
             break;
 
           case 'event':
@@ -293,7 +296,7 @@ export const Main: React.FC = () => {
         return (
           <AddResultsDialog
             onClose={() => {
-              setLayout('main');
+              returnToMain();
               setAddResultsTables([]);
               setAddResultsTableInfo(null);
               setAddResultsStep('');
@@ -302,6 +305,7 @@ export const Main: React.FC = () => {
             step={addResultsStep}
             tables={addResultsTables}
             tableInfo={addResultsTableInfo}
+            extrenalError={appError}
           />
         );
       default:
