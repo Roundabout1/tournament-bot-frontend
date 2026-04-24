@@ -54,6 +54,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Подвести итоги',
       action: handleSumUpResults,
+      hidden: !isAdmin,
     },
     {
       text: 'Ввести результат',
@@ -62,6 +63,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Ред.',
       action: handleEdit,
+      hidden: !isAdmin,
     },
     {
       text: 'Статус',
@@ -70,6 +72,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Удалить игрока',
       action: handleRemovePlayer,
+      hidden: !isAdmin,
     },
     {
       text: 'Жеребьёвка',
@@ -78,6 +81,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Данные туров',
       action: handleRoundsData,
+      hidden: !isAdmin,
     },
   ];
   return <ButtonsList buttonClassName="w-96 py-2 h-auto" buttons={buttons} />;

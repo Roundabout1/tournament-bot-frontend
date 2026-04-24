@@ -21,7 +21,7 @@ export const Main: React.FC = () => {
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
   const [appError, setAppError] = useState<string | null>(null);
-  const IsAdmin = true;
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   /** Функция для добавления сообщения*/
@@ -39,7 +39,7 @@ export const Main: React.FC = () => {
   useEffect(() => {
     let savedName = sessionStorage.getItem('ws_client_name');
     if (!savedName) {
-      const prefix = IsAdmin ? 'admin' : 'judge';
+      const prefix = 'user';
       savedName = `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
       sessionStorage.setItem('ws_client_name', savedName);
     }
@@ -59,7 +59,7 @@ export const Main: React.FC = () => {
   const connectWebSocket = (name: string) => {
     // Определяем WebSocket URL (используем текущий хост)
     // TODO: динамическое получение порта с сервера
-    const wsUrl = `ws://${window.location.hostname}:8000/ws/control/${name}`;
+    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${name}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -82,6 +82,7 @@ export const Main: React.FC = () => {
               'server',
               'Сервер',
             );
+            setIsAdmin(data.role === 'admin');
             break;
 
           case 'create_game':
@@ -265,7 +266,7 @@ export const Main: React.FC = () => {
       case 'main':
         return (
           <MainMenu
-            isAdmin={IsAdmin}
+            isAdmin={isAdmin}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
           />
