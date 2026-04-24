@@ -13,7 +13,7 @@ import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 export const Main: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [clientId, setClientId] = useState<string>('');
+  const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
   const [playerList, setPlayerList] = useState<string[]>([]);
@@ -37,14 +37,14 @@ export const Main: React.FC = () => {
   };
 
   useEffect(() => {
-    let savedId = sessionStorage.getItem('ws_client_id');
-    if (!savedId) {
-      // TODO: получение ID с сервера
-      savedId = `judge_${Math.random().toString(36).substr(2, 9)}`;
-      sessionStorage.setItem('ws_client_id', savedId);
+    let savedName = sessionStorage.getItem('ws_client_name');
+    if (!savedName) {
+      const prefix = IsAdmin ? 'admin' : 'judge';
+      savedName = `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem('ws_client_name', savedName);
     }
-    setClientId(savedId);
-    connectWebSocket(savedId);
+    setClientName(savedName);
+    connectWebSocket(savedName);
 
     // Добавляем приветственное сообщение
     addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
@@ -56,10 +56,10 @@ export const Main: React.FC = () => {
     };
   }, []);
 
-  const connectWebSocket = (id: string) => {
+  const connectWebSocket = (name: string) => {
     // Определяем WebSocket URL (используем текущий хост)
     // TODO: динамическое получение порта с сервера
-    const wsUrl = `ws://${window.location.hostname}:8000/ws/${id}`;
+    const wsUrl = `ws://${window.location.hostname}:8000/ws/${name}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -212,7 +212,7 @@ export const Main: React.FC = () => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
           addChatMessage('Попытка переподключения...', 'system');
-          connectWebSocket(clientId);
+          connectWebSocket(clientName);
         }
       }, 3000);
     };
@@ -335,7 +335,7 @@ export const Main: React.FC = () => {
             <span className="text-red-400">○ Нет подключения к серверу</span>
           )}
         </div>
-        <div className="text-xs text-gray-500">ID: {clientId}</div>
+        <div className="text-xs text-gray-500">ID: {clientName}</div>
       </div>
 
       {/* Основной контент - чат занимает основное пространство */}
