@@ -78,7 +78,7 @@ export const Main: React.FC = () => {
         switch (data.type) {
           case 'connection':
             addChatMessage(
-              `${data.message} (Всего клиентов: ${data.clients_count})`,
+              `${data.message}`,
               'server',
               'Сервер',
             );
