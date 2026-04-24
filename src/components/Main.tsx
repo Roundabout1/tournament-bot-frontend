@@ -59,7 +59,7 @@ export const Main: React.FC = () => {
   const connectWebSocket = (name: string) => {
     // Определяем WebSocket URL (используем текущий хост)
     // TODO: динамическое получение порта с сервера
-    const wsUrl = `ws://${window.location.hostname}:8000/ws/${name}`;
+    const wsUrl = `ws://${window.location.hostname}:8000/ws/control/${name}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
