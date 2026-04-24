@@ -44,7 +44,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       case 'observer':
         return {
           container: 'justify-center',
-          bubble: 'bg-gray-700 text-gray-400',
+          bubble: 'bg-gray-700 text-gray-400 w-[800px]',
           icon: 'ℹ️',
           textSize: 'text-4xl',      // Очень крупный шрифт
           headerSize: 'text-sm',    // Увеличенный шрифт для времени
