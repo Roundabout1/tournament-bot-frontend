@@ -44,6 +44,16 @@ export const Observer: React.FC = () => {
         console.log('Observer получил:', data);
 
         if (data.type === 'observer_connected') {
+          const events = data.history as string[];
+          const events_map = events.map((v, i) => {
+            return {
+              id: `${Date.now().toString()}_${i}`,
+              type: 'observer',
+              text: v,
+              timestamp: new Date(),
+            } as Message;
+          });
+          setMessages(messages.concat(events_map));
           //setMessages((prev) => [...prev, data.message]);
         } else if (data.type === 'event') {
           addChatMessage(data.message);
