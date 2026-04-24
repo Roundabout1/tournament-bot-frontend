@@ -1,6 +1,7 @@
 import React from 'react';
 import { Message } from '../../types/Message';
 import { twMerge } from 'tailwind-merge';
+import { formatServerMessage } from '../../utils/formatMessage';
 
 interface ChatMessageProps {
   message: Message;
@@ -66,11 +67,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     minute: '2-digit',
   });
 
+  // Форматируем сообщение для типов server и system
+  const formattedText = (message.type === 'server' || message.type === 'system' || message.type === 'observer')
+    ? formatServerMessage(message.text)
+    : message.text.replace(/\n/g, '<br/>');
+
   return (
     <div className={twMerge('flex w-full', styles.container)}>
       <div
         className={twMerge(
-          'max-w-[80%] rounded-lg px-4 py-3 shadow-sm', // Увеличенные отступы
+          'max-w-[85%] rounded-lg px-4 py-3 shadow-sm',
           styles.bubble
         )}
       >
@@ -87,9 +93,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             {timeStr}
           </span>
         </div>
-        <div className={twMerge('mt-1 break-words whitespace-pre-wrap font-medium', styles.textSize)}>
-          {message.text}
-        </div>
+        <div 
+          className={twMerge('mt-1 break-words', styles.textSize)}
+          dangerouslySetInnerHTML={{ __html: formattedText }}
+        />
       </div>
     </div>
   );

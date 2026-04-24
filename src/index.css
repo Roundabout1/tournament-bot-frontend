@@ -1,1 +1,84 @@
 @import "tailwindcss";
+/* Стили для форматированных сообщений */
+.prose pre {
+  background-color: #1e1e1e;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.prose code {
+  background-color: #2d2d2d;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'Courier New', monospace;
+}
+
+.prose blockquote {
+  border-left: 3px solid #4b5563;
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.prose a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #93c5fd;
+}
+
+.prose strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.prose em {
+  font-style: italic;
+}
+
+/* Для блоков с кодом */
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.message-content {
+  line-height: 1.5;
+}
+
+.message-content p {
+  margin-bottom: 0.5rem;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Стили для ASCII таблиц */
+.ascii-table {
+  font-family: 'Courier New', 'Fira Code', monospace;
+  font-size: 0.875rem;
+  background-color: #1a1a1a;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.4;
+}
+
+/* Для сообщений со специальным форматированием */
+.message-content pre:not(.ascii-table) {
+  background-color: #1a1a1a;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+}
