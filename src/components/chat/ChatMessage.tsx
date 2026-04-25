@@ -15,7 +15,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           container: 'justify-start',
           bubble: 'bg-blue-600 text-white rounded-br-none',
           icon: '💬',
-          textSize: 'text-base',
+          textSize: 'text-xs md:text-base',
           headerSize: 'text-xs',
         };
       case 'server':
@@ -23,7 +23,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           container: 'justify-start',
           bubble: 'bg-gray-600 text-gray-200 rounded-bl-none',
           icon: '🤖',
-          textSize: 'text-base',
+          textSize: 'text-xs md:text-base',
           headerSize: 'text-xs',
         };
       case 'system':
@@ -31,7 +31,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           container: 'justify-center',
           bubble: 'bg-gray-700 text-gray-400 italic',
           icon: 'ℹ️',
-          textSize: 'text-sm',
+          textSize: 'text-xs md:text-base',
           headerSize: 'text-xs',
         };
       case 'error':
@@ -39,7 +39,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           container: 'justify-center',
           bubble: 'bg-red-900/50 text-red-300',
           icon: '⚠️',
-          textSize: 'text-sm',
+          textSize: 'text-sm md:text-base',
           headerSize: 'text-xs',
         };
       case 'observer':

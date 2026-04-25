@@ -26,7 +26,7 @@ export const ChatLog: React.FC<ChatLogProps> = ({ messages }) => {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-4 space-y-3">
+    <div className="flex h-full flex-col overflow-y-auto p-2 space-y-3">
       {messages.map((message) => (
         <ChatMessage key={message.id} message={message} />
       ))}
