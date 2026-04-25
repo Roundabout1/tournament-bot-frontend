@@ -45,8 +45,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       case 'observer':
         return {
           container: 'justify-center',
-          bubble: 'bg-gray-700 text-gray-400',
-          icon: 'ℹ️',
+          bubble: 'bg-gray-700 text-gray-400 text-center w-full',
+          icon: '',
           textSize: 'text-4xl',
           headerSize: 'text-sm',
         };
@@ -62,7 +62,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   };
 
   const styles = getMessageStyles();
-  const timeStr = message.timestamp.toLocaleTimeString('ru-RU', {
+  const timeStr = message.timestamp?.toLocaleTimeString('ru-RU', {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -71,7 +71,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <div className={twMerge('flex w-full', styles.container)}>
       <div
         className={twMerge(
-          'max-w-[80%] rounded-lg px-4 py-3 shadow-sm', // Увеличенные отступы
+          'max-w-[95%] rounded-lg px-4 py-3 shadow-sm',
           styles.bubble
         )}
       >

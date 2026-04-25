@@ -22,7 +22,6 @@ export const Observer: React.FC = () => {
       id: Date.now().toString(),
       type,
       text,
-      timestamp: new Date(),
       sender,
     };
     setMessages((prev) => [...prev, newMessage]);
@@ -54,7 +53,6 @@ export const Observer: React.FC = () => {
               id: `${Date.now().toString()}_${i}`,
               type: 'observer',
               text: v,
-              timestamp: new Date(),
             } as Message;
           });
           setMessages(messages.concat(events_map));
