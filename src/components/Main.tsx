@@ -9,6 +9,7 @@ import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
 import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
+import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 
 export const Main: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -22,12 +23,15 @@ export const Main: React.FC = () => {
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
   const [appError, setAppError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [editHistoryEntries, setEditHistoryEntries] = useState<any[]>([]);
+  const [editHistoryRecordInfo, setEditHistoryRecordInfo] = useState<any>(null);
+  const [editHistoryStep, setEditHistoryStep] = useState<string>('start');
   const wsRef = useRef<WebSocket | null>(null);
 
   /** Функция для добавления сообщения*/
   const addChatMessage = (text: string, type: Message['type'] = 'system', sender?: string) => {
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now().toString()}_${messages.length}`,
       type,
       text,
       timestamp: new Date(),
@@ -62,7 +66,7 @@ export const Main: React.FC = () => {
       return;
     }
     // Определяем WebSocket URL (используем текущий хост)
-    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${name}`;
+    const wsUrl = `ws://${window.location.hostname}:${8000}/ws/control/${name}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -142,6 +146,28 @@ export const Main: React.FC = () => {
               setAddResultsStep(data.subtype);
             } else if (data.subtype === 'finish') {
               setAddResultsStep(data.subtype);
+            }
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            break;
+
+          case 'edit_history':
+            if (data.subtype === 'start') {
+              setEditHistoryEntries(data.entries || []);
+              setEditHistoryStep(data.subtype);
+              switchLayout('edit_history');
+            } else if (data.subtype === 'entry_player_result') {
+              setEditHistoryRecordInfo({
+                table: data.table,
+                player1: data.player1,
+                player2: data.player2,
+                tour: data.tour,
+                hasFines: data.has_fines,
+              });
+              setEditHistoryStep(data.subtype);
+            } else if (data.subtype === 'finish') {
+              setEditHistoryStep(data.subtype);
             }
             if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
@@ -306,6 +332,22 @@ export const Main: React.FC = () => {
             tables={addResultsTables}
             tableInfo={addResultsTableInfo}
             extrenalError={appError}
+          />
+        );
+      case 'edit_history':
+        return (
+          <EditHistoryDialog
+            onClose={() => {
+              returnToMain();
+              setEditHistoryEntries([]);
+              setEditHistoryRecordInfo(null);
+              setEditHistoryStep('');
+            }}
+            sendMessage={sendWebSocketMessage}
+            step={editHistoryStep}
+            entries={editHistoryEntries}
+            recordInfo={editHistoryRecordInfo}
+            externalError={appError}
           />
         );
       default:

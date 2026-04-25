@@ -1,31 +1,32 @@
 // TODO: реализовать общий компонент для AddResults и EditHistory
 import React, { useEffect, useState } from 'react';
-import { ResultState } from './GameResult';
+import { ResultState, Table } from './GameResult';
 
 interface EditHistoryDialogProps {
   onClose: () => void;
   sendMessage: (type: string, subtype: string, content?: any) => void;
   step?: string;
-  tables?: string[];
-  tableInfo?: {
+  entries?: Array<Array<Table>>;
+  recordInfo?: {
     table: string;
     player1: string;
     player2: string;
-    hasFines: boolean;
+    tour: number;
+    hasFines?: boolean;
   } | null;
-  extrenalError: string | null;
+  externalError: string | null;
 }
-
-const OperationType = 'edit_history';
+const operation_type = 'edit_history';
 
 export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
   onClose,
   sendMessage,
   step,
-  tables = [],
-  tableInfo = null,
-  extrenalError,
+  entries = [],
+  recordInfo = null,
+  externalError,
 }) => {
+  const [selectedTour, setSelectedTour] = useState<number | null>(null);
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [resultState, setResultState] = useState<ResultState>('completed');
   const [winner, setWinner] = useState<string>('');
@@ -35,8 +36,8 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
   const [hasFinished, setHasFinished] = useState<boolean>(false);
 
   useEffect(() => {
-    setError(extrenalError);
-  }, [extrenalError]);
+    setError(externalError);
+  }, [externalError]);
 
   // Отдельный эффект для обработки завершения
   useEffect(() => {
@@ -46,13 +47,20 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
     }
   }, [step]);
 
-  const handleSelectTable = () => {
+  const handleSelectEntry = () => {
+    if (selectedTour === null) {
+      setError('Выберите тур');
+      return;
+    }
     if (!selectedTable) {
       setError('Выберите стол');
       return;
     }
     setError(null);
-    sendMessage(OperationType, 'select_table', { table: selectedTable });
+    sendMessage(operation_type, 'select_entry', {
+      tour: selectedTour,
+      table: selectedTable,
+    });
   };
 
   const handleSubmitResult = () => {
@@ -61,8 +69,8 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
       return;
     }
 
-    const player1 = tableInfo?.player1;
-    const player2 = tableInfo?.player2;
+    const player1 = recordInfo?.player1;
+    const player2 = recordInfo?.player2;
 
     if (!player1 || !player2) {
       setError('Ошибка: данные игроков не найдены');
@@ -81,12 +89,12 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
       content.winner = winner;
     }
 
-    sendMessage(OperationType, 'set_status', content);
+    sendMessage(operation_type, 'set_status', content);
     handleClose();
   };
 
   const handleClose = () => {
-    // Сбрасываем состояние перед закрытием
+    setSelectedTour(null);
     setSelectedTable('');
     setWinner('');
     setResultState('completed');
@@ -98,7 +106,7 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
   };
 
   const handleCancel = () => {
-    sendMessage(OperationType, 'cancel');
+    sendMessage(operation_type, 'cancel');
     handleClose();
   };
 
@@ -107,96 +115,149 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
       <div className="flex items-center justify-center py-8">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
       </div>
-      <p className="text-center text-gray-300">Загрузка списка столов...</p>
+      <p className="text-center text-gray-300">Загрузка списка записей...</p>
       <button
         onClick={handleCancel}
-        className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
+        className="w-full rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
       >
         Отмена
       </button>
     </div>
   );
 
-  const renderSelectTableStep = () => (
-    <div className="space-y-4">
-      <div className="rounded-lg bg-gray-700 p-4 text-center">
-        <h3 className="text-xl font-semibold text-blue-400">Ввод результатов</h3>
-      </div>
-      <h4 className="text-md font-medium text-gray-300">Выберите стол:</h4>
-      <div className="max-h-64 space-y-2 overflow-y-auto">
-        {tables.map((table) => (
-          <div
-            key={table}
-            onClick={() => setSelectedTable(table)}
-            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
-              selectedTable === table
-                ? 'border-blue-500 bg-blue-600 text-white'
-                : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+  const renderSelectEntryStep = () => {
+    // Группируем записи по турам
+    const toursData = entries.map((tourEntries, tourIndex) => ({
+      tourNumber: tourIndex + 1,
+      entries: tourEntries,
+    }));
+
+    return (
+      <div className="space-y-4">
+        <div className="rounded-lg bg-gray-700 p-4 text-center">
+          <h3 className="text-xl font-semibold text-blue-400">Редактирование истории</h3>
+          <p className="mt-1 text-sm text-gray-400">Выберите тур и стол для редактирования</p>
+        </div>
+
+        {/* Выбор тура */}
+        <div>
+          <h4 className="text-md mb-2 font-medium text-gray-300">Выберите тур:</h4>
+          <div className="flex flex-wrap gap-2">
+            {toursData.map((tour) => (
+              <button
+                key={tour.tourNumber}
+                onClick={() => {
+                  setSelectedTour(tour.tourNumber);
+                  setSelectedTable('');
+                }}
+                className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+                  selectedTour === tour.tourNumber
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                Тур {tour.tourNumber}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Выбор стола (отображается только если выбран тур) */}
+        {selectedTour !== null && (
+          <div>
+            <h4 className="text-md mb-2 font-medium text-gray-300">
+              Тур {selectedTour}: выберите стол:
+            </h4>
+            <div className="max-h-48 space-y-2 overflow-y-auto">
+              {toursData[selectedTour - 1]?.entries.map((entry, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setSelectedTable(entry.number)}
+                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-all ${
+                    selectedTable === entry.number
+                      ? 'border-blue-500 bg-blue-600 text-white'
+                      : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+                  }`}
+                >
+                  <span className="text-lg font-medium">Стол №{entry.number}</span>
+                  <span className="text-sm opacity-75">
+                    {entry.players[0].number} vs {entry.players[1].number}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {toursData[selectedTour - 1]?.entries.length === 0 && (
+              <p className="text-center text-gray-400">
+                В этом туре нет записей для редактирования
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-4 pt-4">
+          <button
+            onClick={handleSelectEntry}
+            disabled={!selectedTable}
+            className={`flex-1 rounded-lg px-4 py-2 font-medium text-white transition-colors ${
+              selectedTable ? 'bg-blue-600 hover:bg-blue-700' : 'cursor-not-allowed bg-gray-600'
             }`}
           >
-            <span className="text-lg font-medium">Стол №{table}</span>
-          </div>
-        ))}
+            Далее
+          </button>
+          <button
+            onClick={handleCancel}
+            className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
+          >
+            Отмена
+          </button>
+        </div>
       </div>
-      {tables.length === 0 && <p className="text-center text-gray-400">Нет доступных столов</p>}
-      <div className="flex gap-4 pt-4">
-        <button
-          onClick={handleSelectTable}
-          disabled={!selectedTable}
-          className={`flex-1 rounded-lg px-4 py-2 font-medium text-white transition-colors ${
-            selectedTable ? 'bg-blue-600 hover:bg-blue-700' : 'cursor-not-allowed bg-gray-600'
-          }`}
-        >
-          Далее
-        </button>
-        <button
-          onClick={handleCancel}
-          className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
-        >
-          Отмена
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
-  const renderEnterResultStep = () => (
+  const renderEditResultStep = () => (
     <div className="space-y-4">
       {/* Информация о столе */}
       <div className="rounded-lg bg-gray-700 p-4 text-center">
-        <h3 className="text-xl font-semibold text-blue-400">Стол №{tableInfo?.table}</h3>
+        <h3 className="text-xl font-semibold text-blue-400">
+          Тур {recordInfo?.tour}, Стол №{recordInfo?.table}
+        </h3>
+        <p className="mt-1 text-sm text-gray-300">
+          Игроки: <strong>{recordInfo?.player1}</strong> vs <strong>{recordInfo?.player2}</strong>
+        </p>
       </div>
 
       {/* Выбор победителя / результата */}
-      <h4 className="text-md font-medium text-gray-300">Выберите победителя:</h4>
+      <h4 className="text-md font-medium text-gray-300">Выберите результат:</h4>
       <div className="space-y-2">
         {/* Игрок 1 */}
         <div
           onClick={() => {
-            setWinner(tableInfo?.player1 || '');
+            setWinner(recordInfo?.player1 || '');
             setResultState('completed');
           }}
           className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
-            winner === tableInfo?.player1 && resultState === 'completed'
+            winner === recordInfo?.player1 && resultState === 'completed'
               ? 'border-blue-500 bg-blue-600 text-white'
               : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
           }`}
         >
-          <span className="text-xl font-bold">#{tableInfo?.player1}</span>
+          <span className="text-xl font-bold">#{recordInfo?.player1}</span>
         </div>
 
         {/* Игрок 2 */}
         <div
           onClick={() => {
-            setWinner(tableInfo?.player2 || '');
+            setWinner(recordInfo?.player2 || '');
             setResultState('completed');
           }}
           className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
-            winner === tableInfo?.player2 && resultState === 'completed'
+            winner === recordInfo?.player2 && resultState === 'completed'
               ? 'border-blue-500 bg-blue-600 text-white'
               : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
           }`}
         >
-          <span className="text-xl font-bold">#{tableInfo?.player2}</span>
+          <span className="text-xl font-bold">#{recordInfo?.player2}</span>
         </div>
 
         {/* Ничья */}
@@ -230,30 +291,28 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
         </div>
       </div>
 
-      {/* Штрафы (только если игра их поддерживает) */}
-      {tableInfo?.hasFines && (
-        <div className="mt-4 space-y-2 rounded-lg bg-gray-700/50 p-3">
-          <h5 className="text-sm font-semibold text-gray-300">Штрафы</h5>
-          <label className="flex cursor-pointer items-center space-x-3">
-            <input
-              type="checkbox"
-              checked={hasFines1}
-              onChange={(e) => setHasFines1(e.target.checked)}
-              className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-300">Штраф игроку #{tableInfo?.player1}</span>
-          </label>
-          <label className="flex cursor-pointer items-center space-x-3">
-            <input
-              type="checkbox"
-              checked={hasFines2}
-              onChange={(e) => setHasFines2(e.target.checked)}
-              className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-300">Штраф игроку #{tableInfo?.player2}</span>
-          </label>
-        </div>
-      )}
+      {/* Штрафы */}
+      <div className="mt-4 space-y-2 rounded-lg bg-gray-700/50 p-3">
+        <h5 className="text-sm font-semibold text-gray-300">Штрафы</h5>
+        <label className="flex cursor-pointer items-center space-x-3">
+          <input
+            type="checkbox"
+            checked={hasFines1}
+            onChange={(e) => setHasFines1(e.target.checked)}
+            className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-300">Штраф игроку #{recordInfo?.player1}</span>
+        </label>
+        <label className="flex cursor-pointer items-center space-x-3">
+          <input
+            type="checkbox"
+            checked={hasFines2}
+            onChange={(e) => setHasFines2(e.target.checked)}
+            className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-300">Штраф игроку #{recordInfo?.player2}</span>
+        </label>
+      </div>
 
       {/* Кнопки действий */}
       <div className="flex gap-4 pt-4">
@@ -261,7 +320,7 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
           onClick={handleSubmitResult}
           className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
         >
-          Отправить результат
+          Сохранить изменения
         </button>
         <button
           onClick={handleCancel}
@@ -273,16 +332,37 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
     </div>
   );
 
-  // Определяем, какой шаг рендерить (без вызова handleClose во время рендера)
+  const renderNoRecordsStep = () => (
+    <div className="space-y-4">
+      <div className="rounded-lg bg-yellow-600/20 p-4 text-center">
+        <h3 className="text-xl font-semibold text-yellow-400">Нет записей</h3>
+        <p className="mt-1 text-gray-300">Нет результатов для редактирования</p>
+      </div>
+      <button
+        onClick={handleCancel}
+        className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+      >
+        Закрыть
+      </button>
+    </div>
+  );
+
+  // Определяем, какой шаг рендерить
   const renderStepContent = () => {
-    if (step === 'start' && tables.length === 0) {
+    if (step === 'start' && entries.length === 0) {
+      // Если нет записей для редактирования
+      if (entries.length === 0) {
+        return renderNoRecordsStep();
+      }
       return renderLoad();
     }
     switch (step) {
       case 'start':
-        return renderSelectTableStep();
+        return renderSelectEntryStep();
       case 'entry_player_result':
-        return renderEnterResultStep();
+        return renderEditResultStep();
+      case 'no_records':
+        return renderNoRecordsStep();
       default:
         return renderLoad();
     }

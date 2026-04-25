@@ -18,4 +18,14 @@ export interface TableInfo {
   hasFines: boolean;
 }
 
+export type Player = {
+  number: string;
+  kind: string;
+};
+
+export type Table = {
+  number: string;
+  players: Player[];
+};
+
 export type ResultState = 'completed' | 'draw' | 'underplayed';

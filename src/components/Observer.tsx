@@ -19,7 +19,7 @@ export const Observer: React.FC = () => {
 
   const addChatMessage = (text: string, type: Message['type'] = 'observer', sender?: string) => {
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now().toString()}_${messages.length}`,
       type,
       text,
       sender,

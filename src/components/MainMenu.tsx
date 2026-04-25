@@ -26,7 +26,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleEdit = () => {
-    sendWebSocketMessage('edit', 'edit');
+    sendWebSocketMessage('edit_history', 'start');
+    switchLayout('edit_history');
   };
 
   const handleStatus = () => {
