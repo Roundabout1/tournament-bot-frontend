@@ -1,6 +1,7 @@
 import React from 'react';
 import { Message } from '../../types/Message';
 import { twMerge } from 'tailwind-merge';
+import Markdown from 'react-markdown'
 
 interface ChatMessageProps {
   message: Message;
@@ -44,10 +45,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       case 'observer':
         return {
           container: 'justify-center',
-          bubble: 'bg-gray-700 text-gray-400 w-[800px]',
+          bubble: 'bg-gray-700 text-gray-400',
           icon: 'ℹ️',
-          textSize: 'text-4xl',      // Очень крупный шрифт
-          headerSize: 'text-sm',    // Увеличенный шрифт для времени
+          textSize: 'text-4xl',
+          headerSize: 'text-sm',
         };
       default:
         return {
@@ -88,7 +89,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           </span>
         </div>
         <div className={twMerge('mt-1 break-words whitespace-pre-wrap font-medium', styles.textSize)}>
-          {message.text}
+          <Markdown>
+            {message.text}
+          </Markdown>
         </div>
       </div>
     </div>
