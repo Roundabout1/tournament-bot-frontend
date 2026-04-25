@@ -17,6 +17,7 @@ export const Main: React.FC = () => {
   const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
+  const [suggestedTours, setSuggestedTours] = useState<number | null>(null);
   const [playerList, setPlayerList] = useState<string[]>([]);
   const [addResultsTables, setAddResultsTables] = useState<string[]>([]);
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
@@ -66,7 +67,7 @@ export const Main: React.FC = () => {
       return;
     }
     // Определяем WebSocket URL (используем текущий хост)
-    const wsUrl = `ws://${window.location.hostname}:${8000}/ws/control/${name}`;
+    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${name}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -92,6 +93,11 @@ export const Main: React.FC = () => {
             // Обработка сообщений от сервера для создания игры
             if (data.subtype) {
               setGameCreationStep(data.subtype);
+              if (data.subtype === 'entry_tours_count') {
+                console.log('hello????');
+                console.log(data.suggested);
+                setSuggestedTours(data.suggested);
+              }
               if (data.subtype !== 'create_game_finish') {
                 setLayout('create_game');
               }
@@ -305,6 +311,7 @@ export const Main: React.FC = () => {
             }}
             sendMessage={sendWebSocketMessage}
             currentStep={gameCreationStep}
+            suggestedTours={suggestedTours}
           />
         );
       case 'delete_player':

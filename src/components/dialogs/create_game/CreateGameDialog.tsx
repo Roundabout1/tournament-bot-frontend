@@ -15,12 +15,14 @@ interface CreateGameDialogProps {
   onClose: () => void;
   sendMessage: (type: string, subtype: string, content?: any) => void;
   currentStep: CreateGameStep | null;
+  suggestedTours: number | null;
 }
 
 export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   onClose,
   sendMessage,
   currentStep,
+  suggestedTours,
 }) => {
   // FIXME: no set?
   const [error] = useState<string | null>(null);
@@ -81,6 +83,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
           <ToursCount
             onNext={(data) => handleSendMessage('tour_count', data)}
             onCancel={handleCancel}
+            suggestedTours={suggestedTours ?? 3}
           />
         );
 

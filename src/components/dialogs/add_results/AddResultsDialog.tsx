@@ -160,7 +160,7 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
     <div className="space-y-4">
       {/* Информация о столе */}
       <div className="rounded-lg bg-gray-700 p-4 text-center">
-        <h3 className="text-xl font-semibold text-blue-400">Стол №{tableInfo?.table}</h3>
+        <h3 className="text-xl font-semibold text-blue-400">Стол №{selectedTable}</h3>
       </div>
 
       {/* Выбор победителя / результата */}
