@@ -57,7 +57,8 @@ export const Main: React.FC = () => {
   }, []);
 
   const connectWebSocket = (name: string) => {
-    if (wsRef && wsRef.current?.readyState === wsRef.current?.OPEN) {
+    if (wsRef.current && wsRef.current?.readyState === wsRef.current?.OPEN) {
+      console.log(`Повторная попытка подключиться: ${wsRef.current}`);
       return;
     }
     // Определяем WebSocket URL (используем текущий хост)

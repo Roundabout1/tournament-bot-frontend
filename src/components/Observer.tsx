@@ -29,10 +29,11 @@ export const Observer: React.FC = () => {
   };
 
   const connectWebSocket = () => {
-    if (wsRef && wsRef.current?.readyState === wsRef.current?.OPEN) {
+    if (wsRef.current && wsRef.current?.readyState === wsRef.current?.OPEN) {
+      console.log(`Повторная попытка подключиться: ${wsRef.current}`);
       return;
     }
-    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/observer`;
+    const wsUrl = `ws://${window.location.hostname}:${8000}/ws/observer`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
