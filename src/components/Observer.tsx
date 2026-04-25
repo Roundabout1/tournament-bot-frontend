@@ -29,6 +29,9 @@ export const Observer: React.FC = () => {
   };
 
   const connectWebSocket = () => {
+    if (wsRef && wsRef.current?.readyState === wsRef.current?.OPEN) {
+      return;
+    }
     const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/observer`;
     const websocket = new WebSocket(wsUrl);
 
@@ -127,24 +130,3 @@ export const Observer: React.FC = () => {
     </div>
   );
 };
-
-//   return (
-//     <div className="p-4">
-//       <h1 className="mb-4 text-xl font-bold">Наблюдатель турнира</h1>
-//       <div className="mb-2">
-//         {isConnected ? (
-//           <span className="text-green-500">● Подключен</span>
-//         ) : (
-//           <span className="text-red-500">○ Отключен</span>
-//         )}
-//       </div>
-//       <div className="h-96 overflow-y-auto rounded-lg border bg-gray-50 p-4">
-//         {messages.map((msg, i) => (
-//           <div key={i} className="mb-1 text-sm">
-//             {msg}
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };

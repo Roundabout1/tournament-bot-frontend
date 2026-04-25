@@ -57,8 +57,10 @@ export const Main: React.FC = () => {
   }, []);
 
   const connectWebSocket = (name: string) => {
+    if (wsRef && wsRef.current?.readyState === wsRef.current?.OPEN) {
+      return;
+    }
     // Определяем WebSocket URL (используем текущий хост)
-    // TODO: динамическое получение порта с сервера
     const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${name}`;
     const websocket = new WebSocket(wsUrl);
 
@@ -77,11 +79,7 @@ export const Main: React.FC = () => {
         // Обрабатываем разные типы сообщений
         switch (data.type) {
           case 'connection':
-            addChatMessage(
-              `${data.message}`,
-              'server',
-              'Сервер',
-            );
+            addChatMessage(`${data.message}`, 'server', 'Сервер');
             setIsAdmin(data.role === 'admin');
             break;
 
