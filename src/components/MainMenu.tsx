@@ -21,7 +21,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     sendWebSocketMessage('game_info', 'sum_up_results');
   };
 
-  const handleEnterResults = () => {
+  const handleAddResults = () => {
     sendWebSocketMessage('add_results', 'start');
   };
 
@@ -59,7 +59,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     },
     {
       text: 'Ввести результат',
-      action: handleEnterResults,
+      action: handleAddResults,
     },
     {
       text: 'Ред.',

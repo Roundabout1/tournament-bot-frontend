@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
-import { CreateGameStep } from '../types/CreateGameStep';
+import { CreateGameStep } from "./dialogs/create_game/types";
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';

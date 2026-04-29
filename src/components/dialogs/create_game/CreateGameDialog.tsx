@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreateGameStep } from '../../../types/CreateGameStep';
+import { CreateGameStep } from "./types";
 import { ConfirmNewGame } from './steps/ConfirmNewGame';
 import { PlayersCount } from './steps/PlayersCount';
 import { ShuffleType } from './steps/ShuffleType';
