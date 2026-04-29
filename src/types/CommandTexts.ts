@@ -83,9 +83,9 @@ export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
       },
     },
   },
-  edit: {
-    edit: {
-      text: '📝 Редактирование результатов...',
+  edit_history: {
+    start: {
+      text: '📝 Редактирование истории игры',
     },
   },
   delete_player: {
