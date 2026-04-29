@@ -390,7 +390,7 @@ export const Main: React.FC = () => {
             <span className="text-red-400">○ Нет подключения к серверу</span>
           )}
         </div>
-        <div className="text-xs text-gray-500">ID: {clientName}</div>
+        <div className="text-xs text-gray-500">ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})</div>
       </div>
 
       {/* Основной контент - чат занимает основное пространство */}
