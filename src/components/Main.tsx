@@ -61,6 +61,12 @@ export const Main: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (layout != 'main') {
+      setAppError('');
+    }
+  }, [layout]);
+
   const connectWebSocket = (name: string) => {
     if (wsRef.current && wsRef.current?.readyState === wsRef.current?.OPEN) {
       console.log(`Повторная попытка подключиться: ${wsRef.current}`);
