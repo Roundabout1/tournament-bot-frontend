@@ -3,24 +3,24 @@ import { Main } from './Main';
 import { Observer } from './Observer';
 import { ModeSelect } from './ModeSelect';
 
-type AppMode = 'select' | 'judge' | 'observer';
+type AppMode = 'select' | 'control' | 'observer';
 
 export const App: React.FC = () => {
   const [mode, setMode] = useState<AppMode>('select');
 
   useEffect(() => {
     const savedMode = sessionStorage.getItem('app_mode') as AppMode;
-    if (savedMode === 'judge' || savedMode === 'observer') {
+    if (savedMode === 'control' || savedMode === 'observer') {
       setMode(savedMode);
     }
   }, []);
 
-  const handleSelectMode = (selectedMode: 'judge' | 'observer') => {
+  const handleSelectMode = (selectedMode: 'control' | 'observer') => {
     sessionStorage.setItem('app_mode', selectedMode);
     setMode(selectedMode);
   };
 
-  if (mode === 'judge') {
+  if (mode === 'control') {
     return <Main />;
   }
 

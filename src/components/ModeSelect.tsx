@@ -2,7 +2,7 @@ import React from 'react';
 import { Title } from './Title';
 
 interface ModeSelectProps {
-  onSelectMode: (mode: 'judge' | 'observer') => void;
+  onSelectMode: (mode: 'control' | 'observer') => void;
 }
 
 export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
@@ -14,7 +14,7 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
 
       <div className="w-80 space-y-4">
         <button
-          onClick={() => onSelectMode('judge')}
+          onClick={() => onSelectMode('control')}
           className="w-full rounded-lg bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
         >
           👨‍⚖️ Судья / Администратор
