@@ -100,8 +100,6 @@ export const Main: React.FC = () => {
             if (data.subtype) {
               setGameCreationStep(data.subtype);
               if (data.subtype === 'entry_tours_count') {
-                console.log('hello????');
-                console.log(data.suggested);
                 setSuggestedTours(data.suggested);
               }
               if (data.subtype !== 'create_game_finish') {
