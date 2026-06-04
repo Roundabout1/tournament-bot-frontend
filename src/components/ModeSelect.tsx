@@ -15,21 +15,21 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
       <div className="w-80 space-y-4">
         <button
           onClick={() => onSelectMode('control')}
-          className="w-full rounded-lg bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+          className="w-full rounded-lg bg-indigo-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-indigo-700"
         >
           👩‍💻 Администратор
         </button>
 
         <button
           onClick={() => onSelectMode('control')}
-          className="w-full rounded-lg bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+          className="w-full rounded-lg bg-cyan-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-cyan-700"
         >
           👩‍⚖️ Судья
         </button>
 
         <button
           onClick={() => onSelectMode('observer')}
-          className="w-full rounded-lg bg-green-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-green-700"
+          className="w-full rounded-lg bg-emerald-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-emerald-700"
         >
           🔭 Наблюдатель
         </button>
