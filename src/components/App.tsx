@@ -19,7 +19,7 @@ export const App: React.FC = () => {
     setMode(selectedMode);
   };
 
-  if (mode === 'admin' || mode == 'judge') {
+  if (mode === 'admin' || mode === 'judge') {
     return <Main />;
   }
 
