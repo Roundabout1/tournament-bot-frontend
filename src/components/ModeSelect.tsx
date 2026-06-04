@@ -17,7 +17,14 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
           onClick={() => onSelectMode('control')}
           className="w-full rounded-lg bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
         >
-          👨‍⚖️ Судья / Администратор
+          👩‍💻 Администратор
+        </button>
+
+        <button
+          onClick={() => onSelectMode('control')}
+          className="w-full rounded-lg bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          👩‍⚖️ Судья
         </button>
 
         <button
