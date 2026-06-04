@@ -1,26 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Main } from './Main';
 import { Observer } from './Observer';
 import { ModeSelect } from './ModeSelect';
-
-type AppMode = 'select' | 'control' | 'observer';
+import { AppMode } from '../types/Modes';
 
 export const App: React.FC = () => {
   const [mode, setMode] = useState<AppMode>('select');
 
-  useEffect(() => {
-    const savedMode = sessionStorage.getItem('app_mode') as AppMode;
-    if (savedMode === 'control' || savedMode === 'observer') {
-      setMode(savedMode);
-    }
-  }, []);
+  // useEffect(() => {
+  //   //const savedMode = sessionStorage.getItem('app_mode') as AppMode;
+  //   if (savedMode === 'control' || savedMode === 'observer') {
+  //     setMode(savedMode);
+  //   }
+  // }, []);
 
-  const handleSelectMode = (selectedMode: 'control' | 'observer') => {
-    sessionStorage.setItem('app_mode', selectedMode);
+  const handleSelectMode = (selectedMode: AppMode) => {
+    //sessionStorage.setItem('app_mode', selectedMode);
     setMode(selectedMode);
   };
 
-  if (mode === 'control') {
+  if (mode === 'admin' || mode == 'judge') {
     return <Main />;
   }
 

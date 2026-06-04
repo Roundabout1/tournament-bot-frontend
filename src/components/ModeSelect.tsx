@@ -1,8 +1,9 @@
 import React from 'react';
 import { Title } from './Title';
+import { AppMode } from '../types/Modes';
 
 interface ModeSelectProps {
-  onSelectMode: (mode: 'control' | 'observer') => void;
+  onSelectMode: (mode: AppMode) => void;
 }
 
 export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
@@ -14,14 +15,14 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
 
       <div className="w-80 space-y-4">
         <button
-          onClick={() => onSelectMode('control')}
+          onClick={() => onSelectMode('admin')}
           className="w-full rounded-lg bg-indigo-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-indigo-700"
         >
           👩‍💻 Администратор
         </button>
 
         <button
-          onClick={() => onSelectMode('control')}
+          onClick={() => onSelectMode('judge')}
           className="w-full rounded-lg bg-cyan-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-cyan-700"
         >
           👩‍⚖️ Судья
