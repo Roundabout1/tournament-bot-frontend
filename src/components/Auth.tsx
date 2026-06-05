@@ -1,9 +1,14 @@
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
+import { Control } from './Control';
 
-export const Auth: React.FC<PropsWithChildren> = ({ children }) => {
+interface AuthProps {
+  isAdmin: boolean;
+}
+
+export const Auth: React.FC<AuthProps> = ({ isAdmin }) => {
   const [error] = useState<string | undefined>(undefined);
   const [login, setLogin] = useState<string | undefined>(undefined);
   const [password, setPassword] = useState<string | undefined>(undefined);
@@ -36,7 +41,7 @@ export const Auth: React.FC<PropsWithChildren> = ({ children }) => {
     setPassword(value);
   };
   if (successfulSubmit) {
-    return <div>{children}</div>;
+    return <Control isAdmin={isAdmin} clientName={login ??  `user_${Math.random().toString(36).substr(2, 9)}`} />;
   }
   return (
     <div className="flex h-[100vh] w-[100wh] place-content-center items-center bg-gray-700">

@@ -13,12 +13,12 @@ import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 
 interface ControlProps {
   isAdmin: boolean;
+  clientName: string;
 }
 
-export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
+export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
   const [suggestedTours, setSuggestedTours] = useState<number | null>(null);
@@ -46,14 +46,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   };
 
   useEffect(() => {
-    let savedName = sessionStorage.getItem('ws_client_name');
-    if (!savedName) {
-      const prefix = 'user';
-      savedName = `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
-      sessionStorage.setItem('ws_client_name', savedName);
-    }
-    setClientName(savedName);
-    connectWebSocket(savedName);
+    connectWebSocket(clientName);
 
     // Добавляем приветственное сообщение
     addChatMessage('Добро пожаловать в систему управления турниром!', 'system');

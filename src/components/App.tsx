@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Control } from './Control';
 import { Observer } from './Observer';
 import { ModeSelect } from './ModeSelect';
 import { AppMode } from '../types/Modes';
@@ -21,19 +20,11 @@ export const App: React.FC = () => {
   };
 
   if (mode === 'admin') {
-    return (
-      <Auth>
-        <Control isAdmin={true} />
-      </Auth>
-    );
+    return <Auth isAdmin={true} />;
   }
 
   if (mode === 'judge') {
-    return (
-      <Auth>
-        <Control isAdmin={false} />
-      </Auth>
-    );
+    return <Auth isAdmin={false} />;
   }
 
   if (mode === 'observer') {
