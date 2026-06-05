@@ -32,6 +32,8 @@ export const Auth: React.FC<AuthProps> = ({ isAdmin }) => {
 
     // TODO: послать ws-сообщение с логином и паролём
     console.log(`${password} | ${login}`);
+    sessionStorage.setItem('tournament_bot_login', login);
+    sessionStorage.setItem('tournament_bot_password', password);
     setSuccessfulSubmit(true);
   };
   const onLoginChange = (value: string) => {
@@ -53,7 +55,7 @@ export const Auth: React.FC<AuthProps> = ({ isAdmin }) => {
           <Input
             maxLength={20}
             onChange={(e) => onLoginChange(e.target.value)}
-            placeholder="Логин"
+            placeholder="Имя пользователя"
             required={true}
             disabled={isWaitingData}
           />
