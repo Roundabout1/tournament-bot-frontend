@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Observer } from './Observer';
 import { ModeSelect } from './ModeSelect';
 import { AppMode } from '../types/Modes';
-import { Auth } from './Auth';
+import { Control } from './Control';
 
 export const App: React.FC = () => {
   const [mode, setMode] = useState<AppMode>('select');
@@ -20,11 +20,11 @@ export const App: React.FC = () => {
   };
 
   if (mode === 'admin') {
-    return <Auth isAdmin={true} />;
+    return <Control isAdmin={true} />;
   }
 
   if (mode === 'judge') {
-    return <Auth isAdmin={false} />;
+    return <Control isAdmin={false} />;
   }
 
   if (mode === 'observer') {

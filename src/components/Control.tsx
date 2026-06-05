@@ -10,15 +10,16 @@ import { getCommandText } from '../types/CommandTexts';
 import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
+import { Auth } from './Auth';
 
 interface ControlProps {
   isAdmin: boolean;
-  clientName: string;
 }
 
-export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
+export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
   const [suggestedTours, setSuggestedTours] = useState<number | null>(null);
@@ -31,6 +32,9 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
   const [editHistoryEntries, setEditHistoryEntries] = useState<any[]>([]);
   const [editHistoryRecordInfo, setEditHistoryRecordInfo] = useState<any>(null);
   const [editHistoryStep, setEditHistoryStep] = useState<string>('start');
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<boolean>(false);
+  const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   /** Функция для добавления сообщения*/
@@ -46,7 +50,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
   };
 
   useEffect(() => {
-    connectWebSocket(clientName);
+    connectWebSocket();
 
     // Добавляем приветственное сообщение
     addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
@@ -64,13 +68,13 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
     }
   }, [layout]);
 
-  const connectWebSocket = (name: string) => {
+  const connectWebSocket = () => {
     if (wsRef.current && wsRef.current?.readyState === wsRef.current?.OPEN) {
       console.log(`Повторная попытка подключиться: ${wsRef.current}`);
       return;
     }
     // Определяем WebSocket URL (используем текущий хост)
-    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${name}`;
+    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${isAdmin ? 'admin' : 'judge'}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -89,7 +93,15 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
         switch (data.type) {
           case 'connection':
             addChatMessage(`${data.message}`, 'server', 'Сервер');
+            setIsAuth(true);
+            setAuthError(false);
+            setisWaitingAuth(false);
             //setIsAdmin(data.role === 'admin');
+            break;
+
+          case 'incorrect_password':
+            setAuthError(true);
+            setisWaitingAuth(false);
             break;
 
           case 'create_game':
@@ -245,7 +257,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
           addChatMessage('Попытка переподключения...', 'system');
-          connectWebSocket(clientName);
+          connectWebSocket();
         }
       }, 3000);
     };
@@ -362,6 +374,27 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, clientName }) => {
         return null;
     }
   };
+
+  if (!isConnected) {
+    return (
+      <div className="space-y-4">
+        <p className="text-gray-300">Загрузка...</p>
+      </div>
+    );
+  }
+
+  if (!isAuth) {
+    return (
+      <Auth
+        onSubmit={(name, pass) => {
+          sendWebSocketMessage('auth', '', { name: name, password: pass });
+          setClientName(name);
+        }}
+        authError={authError}
+        isWaitingData={isWaitingAuth}
+      />
+    );
+  }
 
   return (
     <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">

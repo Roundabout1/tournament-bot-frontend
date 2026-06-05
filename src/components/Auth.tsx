@@ -2,18 +2,17 @@ import { useEffect, useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
-import { Control } from './Control';
 
 interface AuthProps {
-  isAdmin: boolean;
+  onSubmit(username: string, password: string): void;
+  authError: boolean;
+  isWaitingData: boolean;
 }
 
-export const Auth: React.FC<AuthProps> = ({ isAdmin }) => {
-  const [error] = useState<string | undefined>(undefined);
+export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData}) => {
+  const [error, setError] = useState<string | undefined>(undefined);
   const [login, setLogin] = useState<string | undefined>(undefined);
   const [password, setPassword] = useState<string | undefined>(undefined);
-  const [isWaitingData, setIsWaitingData] = useState<boolean>(false);
-  const [successfulSubmit, setSuccessfulSubmit] = useState<boolean>(false);
 
   useEffect(() => {
     const savedLogin = sessionStorage.getItem('tournament_bot_login') as string;
@@ -22,19 +21,21 @@ export const Auth: React.FC<AuthProps> = ({ isAdmin }) => {
     setPassword(savedPassword);
   }, []);
 
+  useEffect(()=>{
+    if (authError){
+      setError('Неверный пароль');
+    }
+  }, [authError]);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     e.target.reset();
 
     if (!password || !login) return;
 
-    setIsWaitingData(true);
-
-    // TODO: послать ws-сообщение с логином и паролём
-    console.log(`${password} | ${login}`);
     sessionStorage.setItem('tournament_bot_login', login);
     sessionStorage.setItem('tournament_bot_password', password);
-    setSuccessfulSubmit(true);
+    onSubmit(login, password);
   };
   const onLoginChange = (value: string) => {
     setLogin(value);
@@ -42,9 +43,6 @@ export const Auth: React.FC<AuthProps> = ({ isAdmin }) => {
   const onPasswordChange = (value: string) => {
     setPassword(value);
   };
-  if (successfulSubmit) {
-    return <Control isAdmin={isAdmin} clientName={login ??  `user_${Math.random().toString(36).substr(2, 9)}`} />;
-  }
   return (
     <div className="flex h-[100vh] w-[100wh] place-content-center items-center bg-gray-700">
       <div className="mb-[5%] flex-col items-center text-center">
