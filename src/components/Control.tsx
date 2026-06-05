@@ -11,7 +11,7 @@ import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 
-export const Main: React.FC = () => {
+export const Control: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [clientName, setClientName] = useState<string>('');

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Main } from './Main';
+import { Control } from './Control';
 import { Observer } from './Observer';
 import { ModeSelect } from './ModeSelect';
 import { AppMode } from '../types/Modes';
@@ -20,7 +20,7 @@ export const App: React.FC = () => {
   };
 
   if (mode === 'admin' || mode === 'judge') {
-    return <Main />;
+    return <Control />;
   }
 
   if (mode === 'observer') {
