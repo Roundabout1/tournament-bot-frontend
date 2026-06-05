@@ -19,9 +19,14 @@ export const App: React.FC = () => {
     setMode(selectedMode);
   };
 
-  if (mode === 'admin' || mode === 'judge') {
-    return <Control />;
+  if (mode === 'admin') {
+    return <Control isAdmin={true} />;
   }
+
+  if (mode === 'judge') {
+    return <Control isAdmin={false} />;
+  }
+
 
   if (mode === 'observer') {
     return <Observer />;

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
-import { CreateGameStep } from "./dialogs/create_game/types";
+import { CreateGameStep } from './dialogs/create_game/types';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
@@ -11,7 +11,11 @@ import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 
-export const Control: React.FC = () => {
+interface ControlProps {
+  isAdmin: boolean;
+}
+
+export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [clientName, setClientName] = useState<string>('');
@@ -23,7 +27,7 @@ export const Control: React.FC = () => {
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
   const [appError, setAppError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  //const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [editHistoryEntries, setEditHistoryEntries] = useState<any[]>([]);
   const [editHistoryRecordInfo, setEditHistoryRecordInfo] = useState<any>(null);
   const [editHistoryStep, setEditHistoryStep] = useState<string>('start');
@@ -92,7 +96,7 @@ export const Control: React.FC = () => {
         switch (data.type) {
           case 'connection':
             addChatMessage(`${data.message}`, 'server', 'Сервер');
-            setIsAdmin(data.role === 'admin');
+            //setIsAdmin(data.role === 'admin');
             break;
 
           case 'create_game':
@@ -388,7 +392,9 @@ export const Control: React.FC = () => {
             <span className="text-red-400">○ Нет подключения к серверу</span>
           )}
         </div>
-        <div className="text-xs text-gray-500">ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})</div>
+        <div className="text-xs text-gray-500">
+          ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})
+        </div>
       </div>
 
       {/* Основной контент - чат занимает основное пространство */}
