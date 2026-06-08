@@ -28,11 +28,12 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
   const [appError, setAppError] = useState<string | null>(null);
-  //const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [editHistoryEntries, setEditHistoryEntries] = useState<any[]>([]);
   const [editHistoryRecordInfo, setEditHistoryRecordInfo] = useState<any>(null);
   const [editHistoryStep, setEditHistoryStep] = useState<string>('start');
   const [isAuth, setIsAuth] = useState<boolean>(false);
+  /** заморозка основного интерфейса */
+  const [isMenuFreezed, setIsMenuFreezed] = useState<boolean>(true);
   const [authError, setAuthError] = useState<boolean>(false);
   const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
@@ -96,12 +97,14 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
             setIsAuth(true);
             setAuthError(false);
             setisWaitingAuth(false);
-            //setIsAdmin(data.role === 'admin');
+            setIsMenuFreezed(false);
             break;
 
           case 'incorrect_password':
             setAuthError(true);
             setisWaitingAuth(false);
+            setIsAuth(false);
+            setIsMenuFreezed(true);
             break;
 
           case 'create_game':
@@ -251,6 +254,9 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
       console.log('WebSocket отключен');
       setIsConnected(false);
       addChatMessage('Соединение с сервером разорвано', 'error');
+      setLayout('main');
+      setIsMenuFreezed(true);
+      setIsAuth(false);
 
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
@@ -288,6 +294,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     }
   };
 
+  const sendAuthMessage = (name: string, pass: string) => {
+    sendWebSocketMessage('auth', '', { name: name, password: pass });
+  };
+
   const switchLayout = (layout: Layout) => setLayout(layout);
 
   const logout = () => {
@@ -311,6 +321,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
         return (
           <MainMenu
             isAdmin={isAdmin}
+            disabled={isMenuFreezed}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
           />
@@ -375,10 +386,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     }
   };
 
-  if (!isConnected) {
+  if (!isConnected && !isAuth) {
     return (
-      <div className="space-y-4">
-        <p className="text-gray-300">Загрузка...</p>
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
+        <p className="text-gray-300 text-2xl">Идёт подключение к серверу...</p>
       </div>
     );
   }
@@ -387,7 +398,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     return (
       <Auth
         onSubmit={(name, pass) => {
-          sendWebSocketMessage('auth', '', { name: name, password: pass });
+          sendAuthMessage(name, pass);
           setClientName(name);
         }}
         authError={authError}

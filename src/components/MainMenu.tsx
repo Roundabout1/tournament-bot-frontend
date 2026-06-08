@@ -5,12 +5,14 @@ interface MainMenuProps {
   sendWebSocketMessage: (type: string, subtype: string, content?: any) => void;
   switchLayout: (layout: Layout) => void;
   isAdmin: boolean;
+  disabled?: boolean;
 }
 
 export const MainMenu: React.FC<MainMenuProps> = ({
   sendWebSocketMessage,
   switchLayout,
   isAdmin,
+  disabled = false,
 }) => {
   const handleCreateGame = () => {
     sendWebSocketMessage('create_game', 'create_game');
@@ -85,5 +87,5 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       hidden: !isAdmin,
     },
   ];
-  return <ButtonsList buttonClassName="w-96 py-2 h-auto" buttons={buttons} />;
+  return <ButtonsList buttonClassName="w-96 py-2 h-auto" buttons={buttons} disabled={disabled} />;
 };

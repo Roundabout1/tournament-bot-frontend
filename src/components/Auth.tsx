@@ -11,8 +11,8 @@ interface AuthProps {
 
 export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData}) => {
   const [error, setError] = useState<string | undefined>(undefined);
-  const [login, setLogin] = useState<string | undefined>(undefined);
-  const [password, setPassword] = useState<string | undefined>(undefined);
+  const [login, setLogin] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
   useEffect(() => {
     const savedLogin = sessionStorage.getItem('tournament_bot_login') as string;
@@ -31,7 +31,7 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData})
     e.preventDefault();
     e.target.reset();
 
-    if (!password || !login) return;
+    if (!login) return;
 
     sessionStorage.setItem('tournament_bot_login', login);
     sessionStorage.setItem('tournament_bot_password', password);
@@ -62,7 +62,7 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData})
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder="Пароль"
             type={'password'}
-            required={true}
+            required={false}
             disabled={isWaitingData}
           />
           {error && <span className="text-red-500"> {error} </span>}
