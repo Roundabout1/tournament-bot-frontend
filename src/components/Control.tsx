@@ -3,15 +3,20 @@ import { useState, useEffect, useRef } from 'react';
 import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
-import { CreateGameStep } from "./dialogs/create_game/types";
+import { CreateGameStep } from './dialogs/create_game/types';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
 import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
+import { Auth } from './Auth';
 
-export const Main: React.FC = () => {
+interface ControlProps {
+  isAdmin: boolean;
+}
+
+export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [clientName, setClientName] = useState<string>('');
@@ -23,10 +28,14 @@ export const Main: React.FC = () => {
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
   const [appError, setAppError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [editHistoryEntries, setEditHistoryEntries] = useState<any[]>([]);
   const [editHistoryRecordInfo, setEditHistoryRecordInfo] = useState<any>(null);
   const [editHistoryStep, setEditHistoryStep] = useState<string>('start');
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+  /** заморозка основного интерфейса */
+  const [isMenuFreezed, setIsMenuFreezed] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<boolean>(false);
+  const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   /** Функция для добавления сообщения*/
@@ -41,15 +50,28 @@ export const Main: React.FC = () => {
     setMessages((prev) => [...prev, newMessage]);
   };
 
+  const saveFile = (blob: Blob, name: string) => {
+    const blobURL = URL.createObjectURL(blob);
+    // Сделать невидимый HTML-элемент `<a download>`
+    // и включить его в документ
+    const a = document.createElement('a');
+    a.href = blobURL;
+    a.download = name;
+    a.style.display = 'none';
+    document.body.append(a);
+    // Программно кликнуть по ссылке.
+    a.click();
+    // Уничтожить большой blob URL
+    // и удалить ссылку из документа
+    // после клика по ней
+    setTimeout(() => {
+      URL.revokeObjectURL(blobURL);
+      a.remove();
+    }, 1000);
+  };
+
   useEffect(() => {
-    let savedName = sessionStorage.getItem('ws_client_name');
-    if (!savedName) {
-      const prefix = 'user';
-      savedName = `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
-      sessionStorage.setItem('ws_client_name', savedName);
-    }
-    setClientName(savedName);
-    connectWebSocket(savedName);
+    connectWebSocket();
 
     // Добавляем приветственное сообщение
     addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
@@ -67,13 +89,13 @@ export const Main: React.FC = () => {
     }
   }, [layout]);
 
-  const connectWebSocket = (name: string) => {
+  const connectWebSocket = () => {
     if (wsRef.current && wsRef.current?.readyState === wsRef.current?.OPEN) {
       console.log(`Повторная попытка подключиться: ${wsRef.current}`);
       return;
     }
     // Определяем WebSocket URL (используем текущий хост)
-    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${name}`;
+    const wsUrl = `ws://${window.location.hostname}:${window.location.port}/ws/control/${isAdmin ? 'admin' : 'judge'}`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
@@ -92,7 +114,17 @@ export const Main: React.FC = () => {
         switch (data.type) {
           case 'connection':
             addChatMessage(`${data.message}`, 'server', 'Сервер');
-            setIsAdmin(data.role === 'admin');
+            setIsAuth(true);
+            setAuthError(false);
+            setisWaitingAuth(false);
+            setIsMenuFreezed(false);
+            break;
+
+          case 'incorrect_password':
+            setAuthError(true);
+            setisWaitingAuth(false);
+            setIsAuth(false);
+            setIsMenuFreezed(true);
             break;
 
           case 'create_game':
@@ -238,13 +270,16 @@ export const Main: React.FC = () => {
       console.log('WebSocket отключен');
       setIsConnected(false);
       addChatMessage('Соединение с сервером разорвано', 'error');
+      setLayout('main');
+      setIsMenuFreezed(true);
+      setIsAuth(false);
 
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
           addChatMessage('Попытка переподключения...', 'system');
-          connectWebSocket(clientName);
+          connectWebSocket();
         }
       }, 3000);
     };
@@ -275,6 +310,20 @@ export const Main: React.FC = () => {
     }
   };
 
+  const downloadFile = async (filetype: string, filename: string) => {
+    const response = await fetch(`/download/${filetype}`, {
+      mode: 'cors',
+      method: 'GET',
+    });
+    const blob = await response.blob();
+    saveFile(blob, `${filename}.xlsx`);
+    addChatMessage(`📎 Файл "${filename}" сохранён в загрузках`, 'server', 'Сервер');
+  };
+
+  const sendAuthMessage = (name: string, pass: string) => {
+    sendWebSocketMessage('auth', '', { name: name, password: pass });
+  };
+
   const switchLayout = (layout: Layout) => setLayout(layout);
 
   const logout = () => {
@@ -298,8 +347,10 @@ export const Main: React.FC = () => {
         return (
           <MainMenu
             isAdmin={isAdmin}
+            disabled={isMenuFreezed}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
+            downloadFile={downloadFile}
           />
         );
       case 'create_game':
@@ -362,6 +413,27 @@ export const Main: React.FC = () => {
     }
   };
 
+  if (!isConnected && !isAuth) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
+        <p className="text-2xl text-gray-300">Идёт подключение к серверу...</p>
+      </div>
+    );
+  }
+
+  if (!isAuth) {
+    return (
+      <Auth
+        onSubmit={(name, pass) => {
+          sendAuthMessage(name, pass);
+          setClientName(name);
+        }}
+        authError={authError}
+        isWaitingData={isWaitingAuth}
+      />
+    );
+  }
+
   return (
     <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
       {/* Верхняя панель */}
@@ -384,7 +456,9 @@ export const Main: React.FC = () => {
             <span className="text-red-400">○ Нет подключения к серверу</span>
           )}
         </div>
-        <div className="text-xs text-gray-500">ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})</div>
+        <div className="text-xs text-gray-500">
+          ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})
+        </div>
       </div>
 
       {/* Основной контент - чат занимает основное пространство */}

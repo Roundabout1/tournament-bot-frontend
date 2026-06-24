@@ -47,7 +47,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           container: 'justify-center',
           bubble: 'bg-gray-700 text-gray-400 text-center w-full',
           icon: '',
-          textSize: 'text-4xl',
+          textSize: 'text-xs md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl',
           headerSize: 'text-sm',
         };
       default:
