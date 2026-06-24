@@ -314,6 +314,16 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     }
   };
 
+  const downloadFile = async (filetype: string, filename: string) => {
+    const response = await fetch(`/download/${filetype}`, {
+      mode: 'cors',
+      method: 'GET',
+    });
+    const blob = await response.blob();
+    saveFile(blob, `${filename}.xlsx`);
+    addChatMessage(`📎 Файл "${filename}" сохранён в загрузках`, 'server', 'Сервер');
+  };
+
   const sendAuthMessage = (name: string, pass: string) => {
     sendWebSocketMessage('auth', '', { name: name, password: pass });
   };
@@ -344,6 +354,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
             disabled={isMenuFreezed}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
+            downloadFile={downloadFile}
           />
         );
       case 'create_game':
