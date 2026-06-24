@@ -50,6 +50,26 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     setMessages((prev) => [...prev, newMessage]);
   };
 
+  const saveFile = (blob: Blob, name: string) => {
+    const blobURL = URL.createObjectURL(blob);
+    // Сделать невидимый HTML-элемент `<a download>`
+    // и включить его в документ
+    const a = document.createElement('a');
+    a.href = blobURL;
+    a.download = name;
+    a.style.display = 'none';
+    document.body.append(a);
+    // Программно кликнуть по ссылке.
+    a.click();
+    // Уничтожить большой blob URL
+    // и удалить ссылку из документа
+    // после клика по ней
+    setTimeout(() => {
+      URL.revokeObjectURL(blobURL);
+      a.remove();
+    }, 1000);
+  };
+
   useEffect(() => {
     connectWebSocket();
 
@@ -389,7 +409,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   if (!isConnected && !isAuth) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
-        <p className="text-gray-300 text-2xl">Идёт подключение к серверу...</p>
+        <p className="text-2xl text-gray-300">Идёт подключение к серверу...</p>
       </div>
     );
   }
