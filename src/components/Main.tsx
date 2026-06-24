@@ -112,11 +112,7 @@ export const Main: React.FC = () => {
             break;
 
           case 'game_info':
-            if (data.subtype === 'sum_up_results' || data.subtype === 'rounds_data') {
-              var filename = data.message;
-              var what = data.subtype === 'sum_up_results' ? 'Итоги' : 'Данные туров';
-              addChatMessage(`📎 ${what} сохранены в файле "${filename}"`, 'server', 'Сервер');
-            } else if (data.message) {
+            if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
             }
             break;
