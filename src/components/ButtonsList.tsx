@@ -16,13 +16,15 @@ interface ButtonsListProps {
   buttonClassName?: string;
   alignment?: Alignment;
   direction?: Direction;
+  disabled?: boolean;
 }
 
 export const ButtonsList: React.FC<ButtonsListProps> = ({ 
   buttons, 
   buttonClassName, 
   alignment = 'center',
-  direction = 'horizontal'
+  direction = 'horizontal',
+  disabled = false,
 }) => {
   const visibleButtons = buttons.filter(button => !button.hidden);
 
@@ -36,7 +38,7 @@ export const ButtonsList: React.FC<ButtonsListProps> = ({
   
   return (
     <div className={twMerge(
-      "flex gap-2",
+      "flex gap-2 disabled:opacity-50",
       directionClass,
       alignmentClasses[alignment],
     )}>
@@ -45,6 +47,7 @@ export const ButtonsList: React.FC<ButtonsListProps> = ({
           className={buttonClassName ?? 'w-96 py-2 h-auto'}
           onClick={button.action}
           text={button.text}
+          disabled={disabled}
         />
       ))}
     </div>

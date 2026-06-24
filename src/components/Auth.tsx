@@ -1,77 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
-import { useAuthContext } from './context/AuthContext';
 import { twMerge } from 'tailwind-merge';
-import { useNavigate } from 'react-router';
 
-export const Auth: React.FC = () => {
-  const context = useAuthContext();
-  const navigate = useNavigate();
+interface AuthProps {
+  onSubmit(username: string, password: string): void;
+  authError: boolean;
+  isWaitingData: boolean;
+}
+
+export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData}) => {
   const [error, setError] = useState<string | undefined>(undefined);
-  const [login, setLogin] = useState<string | undefined>(undefined);
-  const [password, setPassword] = useState<string | undefined>(undefined);
-  const [isWaitingData, setIsWaitingData] = useState<boolean>(false);
+  const [login, setLogin] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
-  const clear = () => {
-    setError(undefined);
-    setLogin(undefined);
-    setPassword(undefined);
-    setIsWaitingData(false);
-  };
+  useEffect(() => {
+    const savedLogin = sessionStorage.getItem('tournament_bot_login') as string;
+    setLogin(savedLogin);
+    const savedPassword = sessionStorage.getItem('tournament_bot_password') as string;
+    setPassword(savedPassword);
+  }, []);
+
+  useEffect(()=>{
+    if (authError){
+      setError('Неверный пароль');
+    }
+  }, [authError]);
 
   const handleSubmit = async (e: any) => {
-    if (!context) {
-      throw new Error('Ошибка! Отсутствует контекст!');
-    }
     e.preventDefault();
     e.target.reset();
 
-    if (!password || !login) return;
+    if (!login) return;
 
-    const [, serCurrentUser] = context;
-
-    setIsWaitingData(true);
-
-    const formData = new FormData();
-
-    formData.append('password', password);
-    formData.append('username', login);
-    try {
-      const response = await fetch(`api/token`, {
-        mode: 'cors',
-        method: 'POST',
-        headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
-        body: formData,
-      });
-      if (!response.ok) {
-        setIsWaitingData(false);
-        return;
-      }
-      const token = (await response.json())['access_token'];
-      const adminResponse = await fetch(`api/token`, {
-        mode: 'cors',
-        method: 'POST',
-        headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
-        body: formData,
-      }).then(async (rawResponse) => await rawResponse.json());
-
-      const isAdmin = adminResponse['is_admin'];
-      serCurrentUser({
-        token: token,
-        isAdmin: isAdmin,
-      });
-
-      sessionStorage.clear();
-      if (response.ok) {
-        sessionStorage.setItem('isAdmin', isAdmin);
-        sessionStorage.setItem('token', token);
-        navigate('/');
-      }
-    } finally {
-      clear();
-      setError('Неверный логин или пароль!');
-    }
+    sessionStorage.setItem('tournament_bot_login', login);
+    sessionStorage.setItem('tournament_bot_password', password);
+    onSubmit(login, password);
   };
   const onLoginChange = (value: string) => {
     setLogin(value);
@@ -89,7 +53,7 @@ export const Auth: React.FC = () => {
           <Input
             maxLength={20}
             onChange={(e) => onLoginChange(e.target.value)}
-            placeholder="Логин"
+            placeholder="Имя пользователя"
             required={true}
             disabled={isWaitingData}
           />
@@ -98,7 +62,7 @@ export const Auth: React.FC = () => {
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder="Пароль"
             type={'password'}
-            required={true}
+            required={false}
             disabled={isWaitingData}
           />
           {error && <span className="text-red-500"> {error} </span>}
