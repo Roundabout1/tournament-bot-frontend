@@ -70,13 +70,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       action: handleStatus,
     },
     {
+      text: 'Жеребьёвка',
+      action: handleDraw,
+    },
+    {
       text: 'Удалить игрока',
       action: handleRemovePlayer,
       hidden: !isAdmin,
-    },
-    {
-      text: 'Жеребьёвка',
-      action: handleDraw,
     },
     {
       text: 'Подвести итоги',
