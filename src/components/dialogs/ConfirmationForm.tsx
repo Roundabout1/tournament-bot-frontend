@@ -16,8 +16,8 @@ export const ConfirmationForm: React.FC<ConfirmationFormProps> = ({
 }) => {
   return (
     <div className="flex gap-4">
-      <AcceptButton text={acceptText} handle={handleAccept} />
       <RejectButton text={rejectText} handle={handleReject} />
+      <AcceptButton text={acceptText} handle={handleAccept} />
     </div>
   );
 };

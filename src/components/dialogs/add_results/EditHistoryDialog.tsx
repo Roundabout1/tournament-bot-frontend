@@ -196,6 +196,12 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
 
         <div className="flex gap-4 pt-4">
           <button
+            onClick={handleCancel}
+            className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
+          >
+            Отмена
+          </button>
+          <button
             onClick={handleSelectEntry}
             disabled={!selectedTable}
             className={`flex-1 rounded-lg px-4 py-2 font-medium text-white transition-colors ${
@@ -203,12 +209,6 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
             }`}
           >
             Далее
-          </button>
-          <button
-            onClick={handleCancel}
-            className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
-          >
-            Отмена
           </button>
         </div>
       </div>
@@ -319,16 +319,16 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
       {/* Кнопки действий */}
       <div className="flex gap-4 pt-4">
         <button
-          onClick={handleSubmitResult}
-          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          Сохранить изменения
-        </button>
-        <button
           onClick={handleCancel}
           className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
         >
           Отмена
+        </button>
+        <button
+          onClick={handleSubmitResult}
+          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Сохранить изменения
         </button>
       </div>
     </div>

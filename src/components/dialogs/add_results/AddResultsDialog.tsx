@@ -138,6 +138,12 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
       {tables.length === 0 && <p className="text-center text-gray-400">Нет доступных столов</p>}
       <div className="flex gap-4 pt-4">
         <button
+          onClick={handleCancel}
+          className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
+        >
+          Отмена
+        </button>
+        <button
           onClick={handleSelectTable}
           disabled={!selectedTable}
           className={`flex-1 rounded-lg px-4 py-2 font-medium text-white transition-colors ${
@@ -145,12 +151,6 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
           }`}
         >
           Далее
-        </button>
-        <button
-          onClick={handleCancel}
-          className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
-        >
-          Отмена
         </button>
       </div>
     </div>
@@ -255,16 +255,16 @@ export const AddResultsDialog: React.FC<AddResultsDialogProps> = ({
       {/* Кнопки действий */}
       <div className="flex gap-4 pt-4">
         <button
-          onClick={handleSubmitResult}
-          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          Отправить результат
-        </button>
-        <button
           onClick={handleCancel}
           className="flex-1 rounded-lg bg-gray-600 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-700"
         >
           Отмена
+        </button>
+        <button
+          onClick={handleSubmitResult}
+          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Отправить результат
         </button>
       </div>
     </div>
