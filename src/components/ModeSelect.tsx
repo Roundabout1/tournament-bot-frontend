@@ -32,7 +32,7 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
           onClick={() => onSelectMode('observer')}
           className="w-full rounded-lg bg-emerald-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-emerald-700"
         >
-          🔭 Наблюдатель
+          🎲 Жеребьёвка
         </button>
       </div>
     </div>
