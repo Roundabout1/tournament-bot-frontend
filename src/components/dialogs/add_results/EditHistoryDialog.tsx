@@ -292,27 +292,29 @@ export const EditHistoryDialog: React.FC<EditHistoryDialogProps> = ({
       </div>
 
       {/* Штрафы */}
-      <div className="mt-4 space-y-2 rounded-lg bg-gray-700/50 p-3">
-        <h5 className="text-sm font-semibold text-gray-300">Штрафы</h5>
-        <label className="flex cursor-pointer items-center space-x-3">
-          <input
-            type="checkbox"
-            checked={hasFines1}
-            onChange={(e) => setHasFines1(e.target.checked)}
-            className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-300">Штраф игроку #{recordInfo?.player1}</span>
-        </label>
-        <label className="flex cursor-pointer items-center space-x-3">
-          <input
-            type="checkbox"
-            checked={hasFines2}
-            onChange={(e) => setHasFines2(e.target.checked)}
-            className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-300">Штраф игроку #{recordInfo?.player2}</span>
-        </label>
-      </div>
+      {recordInfo?.hasFines && (
+        <div className="mt-4 space-y-2 rounded-lg bg-gray-700/50 p-3">
+          <h5 className="text-sm font-semibold text-gray-300">Штрафы</h5>
+          <label className="flex cursor-pointer items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={hasFines1}
+              onChange={(e) => setHasFines1(e.target.checked)}
+              className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-300">Штраф игроку #{recordInfo?.player1}</span>
+          </label>
+          <label className="flex cursor-pointer items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={hasFines2}
+              onChange={(e) => setHasFines2(e.target.checked)}
+              className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-300">Штраф игроку #{recordInfo?.player2}</span>
+          </label>
+        </div>
+      )}
 
       {/* Кнопки действий */}
       <div className="flex gap-4 pt-4">
