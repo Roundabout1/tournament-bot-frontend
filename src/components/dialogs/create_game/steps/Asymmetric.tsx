@@ -11,19 +11,19 @@ export const Asymmetric: React.FC<StepProps> = ({ onNext, onCancel }) => {
 
   const buttons = [
     {
-      text: 'Да',
-      action: () => handleSubmit(true),
-    },
-    {
       text: 'Нет',
       action: () => handleSubmit(false),
+    },
+    {
+      text: 'Да',
+      action: () => handleSubmit(true),
     },
   ];
 
   return (
-    <DialogForm header='Асимметричная игра?'>
-      <ButtonsList buttons={buttons} direction='horizontal'/>
-      <RejectButton handle={onCancel}/>
+    <DialogForm header="Асимметричная игра?">
+      <ButtonsList buttons={buttons} direction="horizontal" />
+      <RejectButton handle={onCancel} />
     </DialogForm>
   );
 };

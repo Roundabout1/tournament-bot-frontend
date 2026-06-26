@@ -11,19 +11,19 @@ export const Fines: React.FC<StepProps> = ({ onNext, onCancel }) => {
 
   const buttons = [
     {
-      text: 'Да',
-      action: () => handleSubmit(true),
-    },
-    {
       text: 'Нет',
       action: () => handleSubmit(false),
+    },
+    {
+      text: 'Да',
+      action: () => handleSubmit(true),
     },
   ];
 
   return (
-    <DialogForm header='Есть ли штрафы в игре?'>
-      <ButtonsList buttons={buttons} direction='horizontal'/>
-      <RejectButton handle={onCancel}/>
+    <DialogForm header="Есть ли штрафы в игре?">
+      <ButtonsList buttons={buttons} direction="horizontal" />
+      <RejectButton handle={onCancel} />
     </DialogForm>
   );
 };
