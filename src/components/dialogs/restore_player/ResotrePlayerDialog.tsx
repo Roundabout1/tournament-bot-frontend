@@ -38,7 +38,7 @@ export const RestorePlayerDialog: React.FC<RestorePlayerDialogProps> = ({
   };
 
   const buttons = players.map((x) => ({
-    text: `Удалить игрока ${x}`,
+    text: `Вернуть игрока ${x}`,
     action: () => handleDeleteClick(x),
   }));
 
