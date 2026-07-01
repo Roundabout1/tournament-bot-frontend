@@ -170,6 +170,26 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
             switchLayout('delete_player');
             break;
 
+          case 'restore_player':
+            var sub = data.subtype;
+            if (sub != 'list') {
+              console.warn('Ожидается subtype: list');
+              addChatMessage('Ошибка! Получено некорректное сообщение от сервера!', 'error');
+              break;
+            }
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            if (!data.players) {
+              console.warn('Ожидается поле players');
+              addChatMessage('Ошибка! От сервера не пришёл список игроков!', 'error');
+              break;
+            }
+            var players = data.players as string[];
+            setPlayerList(players);
+            switchLayout('restore_player');
+            break;
+
           case 'add_results':
             if (data.subtype === 'start') {
               setAddResultsTables(data.tables || []);
