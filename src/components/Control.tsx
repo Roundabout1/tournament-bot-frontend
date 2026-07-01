@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
-import { CreateGameStep } from './dialogs/create_game/types';
+import { ConfirmData, CreateGameStep } from './dialogs/create_game/types';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
@@ -321,12 +321,12 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   };
 
   const downloadSumUp = async (filename: string = 'Распределение мест') => {
-    await downloadFile('sum_up_results', filename);  
-  }
+    await downloadFile('sum_up_results', filename);
+  };
 
   const downloadRoundsData = async (filename: string = 'Данные туров') => {
-    await downloadFile('rounds_data', filename);  
-  }
+    await downloadFile('rounds_data', filename);
+  };
 
   const sendAuthMessage = (name: string, pass: string) => {
     sendWebSocketMessage('auth', '', { name: name, password: pass });
@@ -370,6 +370,15 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
               setGameCreationStep(null);
             }}
             sendMessage={sendWebSocketMessage}
+            createNewGame={async (confirm: boolean, download: boolean) => {
+              if (download) {
+                await downloadSumUp();
+                await downloadRoundsData();
+              }
+              sendWebSocketMessage('create_game', 'confirm_new_game', {
+                confirm: confirm,
+              } as ConfirmData);
+            }}
             currentStep={gameCreationStep}
             suggestedTours={suggestedTours}
           />
