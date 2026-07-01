@@ -40,6 +40,10 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     sendWebSocketMessage('delete_player', 'list');
   };
 
+  const handleRestorePlayer = () => {
+    sendWebSocketMessage('restore_player', 'list');
+  };
+
   const handleDraw = () => {
     sendWebSocketMessage('game_info', 'shuffle');
   };
@@ -79,6 +83,11 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       text: 'Удалить игрока',
       action: handleRemovePlayer,
       hidden: !isAdmin,
+    },
+    {
+      text: 'Вернуть игрока',
+      action: handleRestorePlayer,
+      hidden: !isAdmin, // TODO: если удалённых игроков нет, то кнопка спрятана
     },
     {
       text: 'Подвести итоги',

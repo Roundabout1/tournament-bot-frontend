@@ -11,6 +11,7 @@ import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 import { Auth } from './Auth';
+import { RestorePlayerDialog } from './dialogs/restore_player/ResotrePlayerDialog';
 
 interface ControlProps {
   isAdmin: boolean;
@@ -386,6 +387,17 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
       case 'delete_player':
         return (
           <DeletePlayerDialog
+            sendMessage={sendWebSocketMessage}
+            players={playerList}
+            onClose={() => {
+              returnToMain();
+              setPlayerList([]);
+            }}
+          />
+        );
+      case 'restore_player':
+        return (
+          <RestorePlayerDialog
             sendMessage={sendWebSocketMessage}
             players={playerList}
             onClose={() => {
