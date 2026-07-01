@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreateGameStep } from "./types";
+import { CreateGameStep } from './types';
 import { ConfirmNewGame } from './steps/ConfirmNewGame';
 import { PlayersCount } from './steps/PlayersCount';
 import { ShuffleType } from './steps/ShuffleType';
@@ -14,6 +14,7 @@ import { Error } from './steps/Error';
 interface CreateGameDialogProps {
   onClose: () => void;
   sendMessage: (type: string, subtype: string, content?: any) => void;
+  createNewGame: (confirm: boolean, download: boolean) => void;
   currentStep: CreateGameStep | null;
   suggestedTours: number | null;
 }
@@ -21,6 +22,7 @@ interface CreateGameDialogProps {
 export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   onClose,
   sendMessage,
+  createNewGame,
   currentStep,
   suggestedTours,
 }) => {
@@ -40,9 +42,8 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
       case 'confirm_new_game':
         return (
           <ConfirmNewGame
-            onNext={(data) => handleSendMessage('confirm_new_game', data)}
-            // FIXME: костыль, иначе придёт двойное сообщение об отмене с сервера
-            onCancel={() => console.log('on cancel')}
+            onConfirm={(download: boolean) => createNewGame(true, download)}
+            onCancel={() => createNewGame(false, false)}
           />
         );
 

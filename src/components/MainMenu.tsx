@@ -4,7 +4,8 @@ import { ButtonsList } from './ButtonsList';
 interface MainMenuProps {
   sendWebSocketMessage: (type: string, subtype: string, content?: any) => void;
   switchLayout: (layout: Layout) => void;
-  downloadFile: (filetype: string, filename: string) => void;
+  downloadSumUp: () => void;
+  downloadRoundsData: () => void;
   isAdmin: boolean;
   disabled?: boolean;
 }
@@ -12,7 +13,8 @@ interface MainMenuProps {
 export const MainMenu: React.FC<MainMenuProps> = ({
   sendWebSocketMessage,
   switchLayout,
-  downloadFile,
+  downloadSumUp,
+  downloadRoundsData,
   isAdmin,
   disabled = false,
 }) => {
@@ -43,11 +45,11 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleSumUpResults = () => {
-    downloadFile('sum_up_results', 'Распределение мест');
+    downloadSumUp();
   };
 
   const handleRoundsData = () => {
-    downloadFile('rounds_data', 'Данные туров');
+    downloadRoundsData();
   };
 
   const buttons = [
