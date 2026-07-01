@@ -320,6 +320,14 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     addChatMessage(`📎 Файл "${filename}" сохранён в загрузках`, 'server', 'Сервер');
   };
 
+  const downloadSumUp = async (filename: string = 'Распределение мест') => {
+    await downloadFile('sum_up_results', filename);  
+  }
+
+  const downloadRoundsData = async (filename: string = 'Данные туров') => {
+    await downloadFile('rounds_data', filename);  
+  }
+
   const sendAuthMessage = (name: string, pass: string) => {
     sendWebSocketMessage('auth', '', { name: name, password: pass });
   };
@@ -350,7 +358,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
             disabled={isMenuFreezed}
             sendWebSocketMessage={sendWebSocketMessage}
             switchLayout={switchLayout}
-            downloadFile={downloadFile}
+            downloadSumUp={downloadSumUp}
+            downloadRoundsData={downloadRoundsData}
           />
         );
       case 'create_game':
