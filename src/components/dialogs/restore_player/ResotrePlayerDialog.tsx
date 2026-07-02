@@ -45,7 +45,7 @@ export const RestorePlayerDialog: React.FC<RestorePlayerDialogProps> = ({
   const render = () => {
     if (confirmTarget) {
       return (
-        <DialogForm header={`Вы уверены, что хотите вернуть игрока ${confirmTarget}}?`}>
+        <DialogForm header={`Вы уверены, что хотите вернуть игрока ${confirmTarget}?`}>
           <ConfirmationForm
             handleAccept={handleConfirm}
             acceptText="Да"
