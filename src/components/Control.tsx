@@ -11,6 +11,7 @@ import { DeletePlayerDialog } from './dialogs/delete_player/DeletePlayerDialog';
 import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 import { Auth } from './Auth';
+import { RestorePlayerDialog } from './dialogs/restore_player/ResotrePlayerDialog';
 
 interface ControlProps {
   isAdmin: boolean;
@@ -167,6 +168,26 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
             var players = data.players as string[];
             setPlayerList(players);
             switchLayout('delete_player');
+            break;
+
+          case 'restore_player':
+            var sub = data.subtype;
+            if (sub != 'list') {
+              console.warn('Ожидается subtype: list');
+              addChatMessage('Ошибка! Получено некорректное сообщение от сервера!', 'error');
+              break;
+            }
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            if (!data.players) {
+              console.warn('Ожидается поле players');
+              addChatMessage('Ошибка! От сервера не пришёл список игроков!', 'error');
+              break;
+            }
+            var players = data.players as string[];
+            setPlayerList(players);
+            switchLayout('restore_player');
             break;
 
           case 'add_results':
@@ -386,6 +407,17 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
       case 'delete_player':
         return (
           <DeletePlayerDialog
+            sendMessage={sendWebSocketMessage}
+            players={playerList}
+            onClose={() => {
+              returnToMain();
+              setPlayerList([]);
+            }}
+          />
+        );
+      case 'restore_player':
+        return (
+          <RestorePlayerDialog
             sendMessage={sendWebSocketMessage}
             players={playerList}
             onClose={() => {
