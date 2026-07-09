@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
+import { LOGIN_STORAGE_KEY, PASS_STORAGE_KEY } from '../consts/StorageKeys';
 
 interface AuthProps {
   onSubmit(username: string, password: string): void;
@@ -9,20 +10,24 @@ interface AuthProps {
   isWaitingData: boolean;
 }
 
-export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData}) => {
+export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData }) => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [login, setLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
   useEffect(() => {
-    const savedLogin = sessionStorage.getItem('tournament_bot_login') as string;
-    setLogin(savedLogin);
-    const savedPassword = sessionStorage.getItem('tournament_bot_password') as string;
-    setPassword(savedPassword);
+    const savedLogin = sessionStorage.getItem(LOGIN_STORAGE_KEY);
+    //setLogin(savedLogin);
+    const savedPassword = sessionStorage.getItem(PASS_STORAGE_KEY);
+    //setPassword(savedPassword);
+    console.log('pass', savedLogin, savedPassword);
+    if (savedLogin !== null && savedPassword !== null) {
+      onSubmit(savedLogin, savedPassword);
+    }
   }, []);
 
-  useEffect(()=>{
-    if (authError){
+  useEffect(() => {
+    if (authError) {
       setError('Неверный пароль');
     }
   }, [authError]);
@@ -33,8 +38,8 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData})
 
     if (!login) return;
 
-    sessionStorage.setItem('tournament_bot_login', login);
-    sessionStorage.setItem('tournament_bot_password', password);
+    sessionStorage.setItem(LOGIN_STORAGE_KEY, login);
+    sessionStorage.setItem(PASS_STORAGE_KEY, password);
     onSubmit(login, password);
   };
   const onLoginChange = (value: string) => {

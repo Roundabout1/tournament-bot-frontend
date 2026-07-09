@@ -12,13 +12,32 @@ import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 import { Auth } from './Auth';
 import { RestorePlayerDialog } from './dialogs/restore_player/ResotrePlayerDialog';
+import { MESSAGES_STORAGE_KEY } from '../consts/StorageKeys';
 
 interface ControlProps {
   isAdmin: boolean;
 }
 
 export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  // Загрузка сообщений из sessionStorage при инициализации
+  const loadMessagesFromStorage = (): Message[] => {
+    try {
+      const stored = sessionStorage.getItem(MESSAGES_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Восстанавливаем объекты Date из строк
+        return parsed.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки сообщений из sessionStorage:', error);
+    }
+    return [];
+  };
+
+  const [messages, setMessages] = useState<Message[]>(loadMessagesFromStorage);
   const [isConnected, setIsConnected] = useState(false);
   const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
@@ -38,6 +57,15 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   const [authError, setAuthError] = useState<boolean>(false);
   const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
+
+  // Сохранение сообщений в sessionStorage при каждом изменении
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+    } catch (error) {
+      console.error('Ошибка сохранения сообщений в sessionStorage:', error);
+    }
+  }, [messages]);
 
   /** Функция для добавления сообщения*/
   const addChatMessage = (text: string, type: Message['type'] = 'system', sender?: string) => {
@@ -74,8 +102,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   useEffect(() => {
     connectWebSocket();
 
-    // Добавляем приветственное сообщение
-    addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
+    // Добавляем приветственное сообщение только если нет сохранённых сообщений
+    if (messages.length === 0) {
+      addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
+    }
 
     return () => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -360,6 +390,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
       wsRef.current.close();
     }
     sessionStorage.clear();
+    // Очищаем сообщения при выходе
+    sessionStorage.removeItem(MESSAGES_STORAGE_KEY);
     addChatMessage('Вы вышли из системы', 'system');
     setTimeout(() => {
       window.location.reload();
