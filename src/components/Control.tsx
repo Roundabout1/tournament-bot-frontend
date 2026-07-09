@@ -392,10 +392,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     sessionStorage.clear();
     // Очищаем сообщения при выходе
     sessionStorage.removeItem(MESSAGES_STORAGE_KEY);
-    addChatMessage('Вы вышли из системы', 'system');
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    //addChatMessage('Вы вышли из системы', 'system');
+    window.location.reload();
   };
 
   const returnToMain = () => {
