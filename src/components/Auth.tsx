@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Input } from './Input';
-import { Title } from './Title';
+//import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
 import { LOGIN_STORAGE_KEY, PASS_STORAGE_KEY } from '../consts/StorageKeys';
 
@@ -52,7 +52,7 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData }
     <div className="flex h-[100vh] w-[100wh] place-content-center items-center bg-gray-700">
       <div className="mb-[5%] flex-col items-center text-center">
         <div className="mb-3">
-          <Title />
+          <h1 className='text-gradient text-4xl'>Вход</h1>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
           <Input

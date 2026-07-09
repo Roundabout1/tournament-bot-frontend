@@ -495,15 +495,31 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     }
   };
 
-  if (!isConnected && !isAuth) {
+  const renderTopPanel = () => {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
-        <p className="text-2xl text-gray-300">Идёт подключение к серверу...</p>
+      <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
+        <Title />
+        <button
+          className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
+          onClick={logout}
+        >
+          Выйти
+        </button>
       </div>
     );
-  }
+  };
 
-  if (!isAuth) {
+  const renderAuthForm = () => {
+    if (isAuth) {
+      return;
+    }
+    if (!isConnected) {
+      return (
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
+          <p className="text-2xl text-gray-300">Идёт подключение к серверу...</p>
+        </div>
+      );
+    }
     return (
       <Auth
         onSubmit={(name, pass) => {
@@ -514,22 +530,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
         isWaitingData={isWaitingAuth}
       />
     );
-  }
+  };
 
-  return (
-    <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
-      {/* Верхняя панель */}
-      <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
-        <Title />
-        <button
-          className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
-          onClick={logout}
-        >
-          Выйти
-        </button>
-      </div>
-
-      {/* Статус подключения */}
+  const renderSubTopPanel = () => {
+    return (
       <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-2">
         <div className="text-sm">
           {isConnected ? (
@@ -542,8 +546,11 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
           ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})
         </div>
       </div>
+    );
+  };
 
-      {/* Основной контент - чат занимает основное пространство */}
+  const renderChat = () => {
+    return (
       <div className="flex flex-1 flex-col overflow-hidden bg-gray-800">
         {/* Заголовок чата */}
         <div className="border-b border-gray-700 px-4 py-2">
@@ -555,9 +562,31 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
           <ChatLog messages={messages} />
         </div>
       </div>
+    );
+  };
 
-      {/* Нижняя панель - меню */}
-      <div className="border-t border-gray-700 bg-gray-900 p-4">{renderLayout()}</div>
+  const renderMenu = () => {
+    return <div className="border-t border-gray-700 bg-gray-900 p-4">{renderLayout()}</div>;
+  };
+
+  const renderControlPanel = () => {
+    if (!isAuth) {
+      return null;
+    }
+    return (
+      <>
+        {renderSubTopPanel()}
+        {renderChat()}
+        {renderMenu()}
+      </>
+    );
+  };
+
+  return (
+    <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
+      {renderTopPanel()}
+      {renderAuthForm()}
+      {renderControlPanel()}
     </div>
   );
 };
