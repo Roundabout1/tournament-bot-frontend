@@ -1,27 +1,42 @@
 import { useEffect, useState } from 'react';
 import { Input } from './Input';
 import { twMerge } from 'tailwind-merge';
-import { LOGIN_STORAGE_KEY, PASS_STORAGE_KEY } from '../consts/StorageKeys';
+import { ADMIN_AUTH_KEYS, JUDGE_AUTH_KEYS } from '../consts/StorageKeys';
+import { AuthInfo } from '../types/Auth';
 
 interface AuthProps {
   onSubmit(username: string, password: string): void;
   authError: boolean;
   isWaitingData: boolean;
+  isAdmin: boolean;
 }
 
-export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData }) => {
+export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData, isAdmin }) => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [login, setLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
+  const getAuthStorage = (keys: AuthInfo): AuthInfo => {
+    return {
+      login: sessionStorage.getItem(keys.login ?? ''),
+      pass: sessionStorage.getItem(keys.pass ?? ''),
+    };
+  };
+
+  const setAuthStorage = (keys: AuthInfo) => {
+    if (!keys.login || !keys.pass) {
+      return;
+    }
+    sessionStorage.setItem(keys.login, login);
+    sessionStorage.setItem(keys.pass, password);
+  };
+
   useEffect(() => {
-    const savedLogin = sessionStorage.getItem(LOGIN_STORAGE_KEY);
-    //setLogin(savedLogin);
-    const savedPassword = sessionStorage.getItem(PASS_STORAGE_KEY);
-    //setPassword(savedPassword);
-    console.log('pass', savedLogin, savedPassword);
-    if (savedLogin !== null && savedPassword !== null) {
-      onSubmit(savedLogin, savedPassword);
+    const savedAuth: AuthInfo = isAdmin
+      ? getAuthStorage(ADMIN_AUTH_KEYS)
+      : getAuthStorage(JUDGE_AUTH_KEYS);
+    if (savedAuth.login !== null && savedAuth.pass !== null) {
+      onSubmit(savedAuth.login, savedAuth.pass);
     }
   }, []);
 
@@ -37,8 +52,11 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData }
 
     if (!login) return;
 
-    sessionStorage.setItem(LOGIN_STORAGE_KEY, login);
-    sessionStorage.setItem(PASS_STORAGE_KEY, password);
+    if (isAdmin) {
+      setAuthStorage(ADMIN_AUTH_KEYS);
+    } else {
+      setAuthStorage(JUDGE_AUTH_KEYS);
+    }
     onSubmit(login, password);
   };
   const onLoginChange = (value: string) => {
@@ -51,7 +69,7 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData }
     <div className="flex h-[100vh] w-[100wh] place-content-center items-center bg-gray-700">
       <div className="mb-[5%] flex-col items-center text-center">
         <div className="mb-3">
-          <h1 className='text-gradient text-4xl'>Вход</h1>
+          <h1 className="text-gradient text-4xl">Вход</h1>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
           <Input

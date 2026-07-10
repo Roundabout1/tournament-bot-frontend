@@ -544,6 +544,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
         }}
         authError={authError}
         isWaitingData={isWaitingAuth}
+        isAdmin={isAdmin}
       />
     );
   };
