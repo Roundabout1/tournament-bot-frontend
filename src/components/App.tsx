@@ -14,20 +14,25 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectMode = (selectedMode: AppMode) => {
-    sessionStorage.setItem('app_mode', selectedMode);
+    sessionStorage.setItem(MODE_STORAGE_KEY, selectedMode);
     setMode(selectedMode);
   };
 
+  const handleLogout = () => {
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
   if (mode === 'admin') {
-    return <Control isAdmin={true} />;
+    return <Control isAdmin={true} logout={handleLogout} />;
   }
 
   if (mode === 'judge') {
-    return <Control isAdmin={false} />;
+    return <Control isAdmin={false} logout={handleLogout} />;
   }
 
   if (mode === 'observer') {
-    return <Observer />;
+    return <Observer logout={handleLogout} />;
   }
 
   return <ModeSelect onSelectMode={handleSelectMode} />;

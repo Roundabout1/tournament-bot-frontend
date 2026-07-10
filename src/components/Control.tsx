@@ -13,12 +13,13 @@ import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 import { Auth } from './Auth';
 import { RestorePlayerDialog } from './dialogs/restore_player/ResotrePlayerDialog';
 import { MESSAGES_STORAGE_KEY } from '../consts/StorageKeys';
+import { LogoutProps } from './interfaces/logout';
 
-interface ControlProps {
+interface ControlProps extends LogoutProps {
   isAdmin: boolean;
 }
 
-export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
+export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   // Загрузка сообщений из sessionStorage при инициализации
   const loadMessagesFromStorage = (): Message[] => {
     try {
@@ -38,7 +39,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   };
 
   const [messages, setMessages] = useState<Message[]>(loadMessagesFromStorage);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [connectionError, setConnectionError] = useState<boolean>(false);
   const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
@@ -66,6 +68,20 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
       console.error('Ошибка сохранения сообщений в sessionStorage:', error);
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (isConnected || !isAuth) {
+      return;
+    }
+    addChatMessage('Соединение с сервером разорвано', 'error');
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (!connectionError) {
+      return;
+    }
+    addChatMessage('Ошибка подключения к серверу', 'error');
+  }, [connectionError]);
 
   /** Функция для добавления сообщения*/
   const addChatMessage = (text: string, type: Message['type'] = 'system', sender?: string) => {
@@ -132,6 +148,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     websocket.onopen = () => {
       console.log('WebSocket подключен');
       setIsConnected(true);
+      setConnectionError(false);
+      setIsAuth(false);
       addChatMessage('Соединение с сервером установлено', 'system');
     };
 
@@ -313,23 +331,22 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
 
     websocket.onerror = (error) => {
       console.error('WebSocket ошибка:', error);
-      addChatMessage('Ошибка подключения к WebSocket', 'error');
+      setConnectionError(true);
       setIsConnected(false);
     };
 
     websocket.onclose = () => {
       console.log('WebSocket отключен');
       setIsConnected(false);
-      addChatMessage('Соединение с сервером разорвано', 'error');
       setLayout('main');
       setIsMenuFreezed(true);
-      setIsAuth(false);
+      //setIsAuth(false);
 
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
-          addChatMessage('Попытка переподключения...', 'system');
+          //addChatMessage('Попытка переподключения...', 'system');
           connectWebSocket();
         }
       }, 3000);
@@ -385,15 +402,11 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
 
   const switchLayout = (layout: Layout) => setLayout(layout);
 
-  const logout = () => {
+  const onLogout = () => {
     if (wsRef.current) {
       wsRef.current.close();
     }
-    sessionStorage.clear();
-    // Очищаем сообщения при выходе
-    sessionStorage.removeItem(MESSAGES_STORAGE_KEY);
-    //addChatMessage('Вы вышли из системы', 'system');
-    window.location.reload();
+    logout();
   };
 
   const returnToMain = () => {
@@ -499,7 +512,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
         <Title />
         <button
           className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
-          onClick={logout}
+          onClick={onLogout}
         >
           Выйти
         </button>
