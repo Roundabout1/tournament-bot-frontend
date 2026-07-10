@@ -58,10 +58,14 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const [isMenuFreezed, setIsMenuFreezed] = useState<boolean>(true);
   const [authError, setAuthError] = useState<boolean>(false);
   const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
+  const [chatSessionStore, setChatSessionStore] = useState<boolean>(true);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Сохранение сообщений в sessionStorage при каждом изменении
   useEffect(() => {
+    if (!chatSessionStore) {
+      return;
+    }
     try {
       sessionStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
     } catch (error) {
@@ -403,6 +407,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const switchLayout = (layout: Layout) => setLayout(layout);
 
   const onLogout = () => {
+    setChatSessionStore(false);
     if (wsRef.current) {
       wsRef.current.close();
     }
