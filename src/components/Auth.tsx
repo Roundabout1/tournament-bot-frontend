@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Input } from './Input';
-//import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
 import { LOGIN_STORAGE_KEY, PASS_STORAGE_KEY } from '../consts/StorageKeys';
 
