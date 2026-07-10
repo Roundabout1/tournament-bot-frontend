@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
-import { ConfirmData, CreateGameStep } from './dialogs/create_game/types';
+import { ConfirmData, CreateGameState } from './dialogs/create_game/types';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
@@ -43,8 +43,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const [connectionError, setConnectionError] = useState<boolean>(false);
   const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
-  const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
-  const [suggestedTours, setSuggestedTours] = useState<number | null>(null);
+  const [gameCreationStep, setGameCreationStep] = useState<CreateGameState | null>(null);
+  //const [suggestedTours] = useState<number | null>(null);
   const [playerList, setPlayerList] = useState<string[]>([]);
   const [addResultsTables, setAddResultsTables] = useState<string[]>([]);
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
@@ -181,22 +181,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             break;
 
           case 'create_game':
-            // Обработка сообщений от сервера для создания игры
-            if (data.subtype) {
-              setGameCreationStep(data.subtype);
-              if (data.subtype === 'entry_tours_count') {
-                setSuggestedTours(data.suggested);
-              }
-              if (data.subtype !== 'create_game_finish') {
-                setLayout('create_game');
-              }
+            setGameCreationStep(data.subtype);
+            if (data.subtype === 'start' || data.subtype === 'confirm') {
+              switchLayout('create_game');
             }
-            if (data.message) {
-              addChatMessage(data.message, 'server', 'Сервер');
-            }
-            break;
-
-          case 'game_info':
             if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
             }
@@ -424,7 +412,6 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             isAdmin={isAdmin}
             disabled={isMenuFreezed}
             sendWebSocketMessage={sendWebSocketMessage}
-            switchLayout={switchLayout}
             downloadSumUp={downloadSumUp}
             downloadRoundsData={downloadRoundsData}
           />
@@ -437,17 +424,17 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
               setGameCreationStep(null);
             }}
             sendMessage={sendWebSocketMessage}
-            createNewGame={async (confirm: boolean, download: boolean) => {
+            confirmNewGame={async (confirm: boolean, download: boolean) => {
               if (download) {
                 await downloadSumUp();
                 await downloadRoundsData();
               }
-              sendWebSocketMessage('create_game', 'confirm_new_game', {
+              sendWebSocketMessage('create_game', 'confirm', {
                 confirm: confirm,
               } as ConfirmData);
             }}
             currentStep={gameCreationStep}
-            suggestedTours={suggestedTours}
+            serverError={appError}
           />
         );
       case 'delete_player':

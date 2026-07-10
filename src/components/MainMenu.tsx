@@ -1,9 +1,7 @@
-import { Layout } from '../types/Layout';
 import { ButtonsList } from './ButtonsList';
 
 interface MainMenuProps {
   sendWebSocketMessage: (type: string, subtype: string, content?: any) => void;
-  switchLayout: (layout: Layout) => void;
   downloadSumUp: () => void;
   downloadRoundsData: () => void;
   isAdmin: boolean;
@@ -12,15 +10,13 @@ interface MainMenuProps {
 
 export const MainMenu: React.FC<MainMenuProps> = ({
   sendWebSocketMessage,
-  switchLayout,
   downloadSumUp,
   downloadRoundsData,
   isAdmin,
   disabled = false,
 }) => {
   const handleCreateGame = () => {
-    sendWebSocketMessage('create_game', 'create_game');
-    switchLayout('create_game');
+    sendWebSocketMessage('create_game', 'start');
   };
 
   const handleAddResults = () => {
@@ -29,7 +25,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
 
   const handleEdit = () => {
     sendWebSocketMessage('edit_history', 'start');
-    switchLayout('edit_history');
   };
 
   const handleStatus = () => {

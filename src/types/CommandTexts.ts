@@ -9,44 +9,32 @@ export interface CommandConfig {
 
 export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
   create_game: {
-    create_game: {
+    start: {
       text: '📋 Начать создание новой игры',
     },
-    confirm_new_game: {
-      format: (params) =>
-        params.confirm ? '✅ Подтверждено создание новой игры' : '❌ Отменено создание новой игры',
-    },
-    player_count: {
-      format: (params) => `👥 Установлено количество игроков: ${params.count}`,
-    },
-    shuffle_type: {
+    make: {
       format: (params) => {
-        const shuffleMap: Record<string, string> = {
+        const shuffleIcons: Record<string, string> = {
           Круговая: '🔄',
           Рейтинговая: '📊',
           Случайная: '🎲',
           'Мульти-турнир': '🏆',
         };
-        const icon = shuffleMap[params.shuffle] || '🎯';
-        return `${icon} Выбран тип жеребьёвки: ${params.shuffle}`;
+        const icon = shuffleIcons[params.shuffle] || '🎯';
+        let text = `🎮 Создание игры:\n`;
+        text += `👥 Игроков: ${params.num_players}\n`;
+        text += `${icon} Жеребьёвка: ${params.shuffle}\n`;
+        if (params.num_tours !== null) text += `📊 Туров: ${params.num_tours}\n`;
+        if (params.multiplier !== null) text += `✖️ Множитель: ${params.multiplier}\n`;
+        if (params.size_group !== null) text += `👥 Размер группы: ${params.size_group}\n`;
+        text += `🔄 Асимметричная: ${params.is_asymmetric ? 'Да' : 'Нет'}\n`;
+        text += `💰 Штрафы: ${params.has_fines ? 'Да' : 'Нет'}`;
+        return text;
       },
     },
-    set_multi_tour_group_size: {
-      format: (params) => `👥 Установлен размер группы: ${params.count}`,
-    },
-    set_multiplier: {
-      format: (params) => `✖️ Установлен множитель туров: ${params.count}`,
-    },
-    tour_count: {
-      format: (params) => `📊 Установлено количество туров: ${params.count}`,
-    },
-    asymmetric: {
+    confirm: {
       format: (params) =>
-        params.is_asymmetric ? '🔄 Игра будет асимметричной' : '⚖️ Игра будет симметричной',
-    },
-    fines: {
-      format: (params) =>
-        params.has_fines ? '💰 В игре будут штрафы' : '✅ Штрафы в игре отсутствуют',
+        params.confirm ? '✅ Подтверждено создание новой игры' : '❌ Отменено создание новой игры',
     },
   },
   game_info: {
