@@ -344,13 +344,11 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
       setIsConnected(false);
       setLayout('main');
       setIsMenuFreezed(true);
-      //setIsAuth(false);
 
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
-          //addChatMessage('Попытка переподключения...', 'system');
           connectWebSocket();
         }
       }, 3000);
