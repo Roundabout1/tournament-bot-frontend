@@ -12,14 +12,35 @@ import { AddResultsDialog } from './dialogs/add_results/AddResultsDialog';
 import { EditHistoryDialog } from './dialogs/add_results/EditHistoryDialog';
 import { Auth } from './Auth';
 import { RestorePlayerDialog } from './dialogs/restore_player/ResotrePlayerDialog';
+import { MESSAGES_STORAGE_KEY } from '../consts/StorageKeys';
+import { LogoutProps } from './interfaces/logout';
 
-interface ControlProps {
+interface ControlProps extends LogoutProps {
   isAdmin: boolean;
 }
 
-export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
+  // Загрузка сообщений из sessionStorage при инициализации
+  const loadMessagesFromStorage = (): Message[] => {
+    try {
+      const stored = sessionStorage.getItem(MESSAGES_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Восстанавливаем объекты Date из строк
+        return parsed.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки сообщений из sessionStorage:', error);
+    }
+    return [];
+  };
+
+  const [messages, setMessages] = useState<Message[]>(loadMessagesFromStorage);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [connectionError, setConnectionError] = useState<boolean>(false);
   const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameStep | null>(null);
@@ -37,7 +58,34 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   const [isMenuFreezed, setIsMenuFreezed] = useState<boolean>(true);
   const [authError, setAuthError] = useState<boolean>(false);
   const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
+  const [chatSessionStore, setChatSessionStore] = useState<boolean>(true);
   const wsRef = useRef<WebSocket | null>(null);
+
+  // Сохранение сообщений в sessionStorage при каждом изменении
+  useEffect(() => {
+    if (!chatSessionStore) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+    } catch (error) {
+      console.error('Ошибка сохранения сообщений в sessionStorage:', error);
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (isConnected || !isAuth) {
+      return;
+    }
+    addChatMessage('Соединение с сервером разорвано', 'error');
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (!connectionError) {
+      return;
+    }
+    addChatMessage('Ошибка подключения к серверу', 'error');
+  }, [connectionError]);
 
   /** Функция для добавления сообщения*/
   const addChatMessage = (text: string, type: Message['type'] = 'system', sender?: string) => {
@@ -74,8 +122,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
   useEffect(() => {
     connectWebSocket();
 
-    // Добавляем приветственное сообщение
-    addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
+    // Добавляем приветственное сообщение только если нет сохранённых сообщений
+    if (messages.length === 0) {
+      addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
+    }
 
     return () => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -102,6 +152,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     websocket.onopen = () => {
       console.log('WebSocket подключен');
       setIsConnected(true);
+      setConnectionError(false);
+      setIsAuth(false);
       addChatMessage('Соединение с сервером установлено', 'system');
     };
 
@@ -283,23 +335,20 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
 
     websocket.onerror = (error) => {
       console.error('WebSocket ошибка:', error);
-      addChatMessage('Ошибка подключения к WebSocket', 'error');
+      setConnectionError(true);
       setIsConnected(false);
     };
 
     websocket.onclose = () => {
       console.log('WebSocket отключен');
       setIsConnected(false);
-      addChatMessage('Соединение с сервером разорвано', 'error');
       setLayout('main');
       setIsMenuFreezed(true);
-      setIsAuth(false);
 
       // Пытаемся переподключиться через 3 секунды
       setTimeout(() => {
         if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
           console.log('Попытка переподключения...');
-          addChatMessage('Попытка переподключения...', 'system');
           connectWebSocket();
         }
       }, 3000);
@@ -355,15 +404,12 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
 
   const switchLayout = (layout: Layout) => setLayout(layout);
 
-  const logout = () => {
+  const onLogout = () => {
+    setChatSessionStore(false);
     if (wsRef.current) {
       wsRef.current.close();
     }
-    sessionStorage.clear();
-    addChatMessage('Вы вышли из системы', 'system');
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    logout();
   };
 
   const returnToMain = () => {
@@ -463,15 +509,31 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
     }
   };
 
-  if (!isConnected && !isAuth) {
+  const renderTopPanel = () => {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
-        <p className="text-2xl text-gray-300">Идёт подключение к серверу...</p>
+      <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
+        <Title />
+        <button
+          className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
+          onClick={onLogout}
+        >
+          Выйти
+        </button>
       </div>
     );
-  }
+  };
 
-  if (!isAuth) {
+  const renderAuthForm = () => {
+    if (isAuth) {
+      return;
+    }
+    if (!isConnected) {
+      return (
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-gray-800">
+          <p className="text-2xl text-gray-300">Идёт подключение к серверу...</p>
+        </div>
+      );
+    }
     return (
       <Auth
         onSubmit={(name, pass) => {
@@ -480,24 +542,13 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
         }}
         authError={authError}
         isWaitingData={isWaitingAuth}
+        isAdmin={isAdmin}
       />
     );
-  }
+  };
 
-  return (
-    <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
-      {/* Верхняя панель */}
-      <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-3">
-        <Title />
-        <button
-          className="rounded bg-[#324ab2] px-4 py-2 text-gray-200 transition-colors hover:bg-[#3b56c4]"
-          onClick={logout}
-        >
-          Выйти
-        </button>
-      </div>
-
-      {/* Статус подключения */}
+  const renderSubTopPanel = () => {
+    return (
       <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-6 py-2">
         <div className="text-sm">
           {isConnected ? (
@@ -510,8 +561,11 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
           ID: {clientName} ({isAdmin ? 'Администратор' : 'Судья'})
         </div>
       </div>
+    );
+  };
 
-      {/* Основной контент - чат занимает основное пространство */}
+  const renderChat = () => {
+    return (
       <div className="flex flex-1 flex-col overflow-hidden bg-gray-800">
         {/* Заголовок чата */}
         <div className="border-b border-gray-700 px-4 py-2">
@@ -523,9 +577,31 @@ export const Control: React.FC<ControlProps> = ({ isAdmin }) => {
           <ChatLog messages={messages} />
         </div>
       </div>
+    );
+  };
 
-      {/* Нижняя панель - меню */}
-      <div className="border-t border-gray-700 bg-gray-900 p-4">{renderLayout()}</div>
+  const renderMenu = () => {
+    return <div className="border-t border-gray-700 bg-gray-900 p-4">{renderLayout()}</div>;
+  };
+
+  const renderControlPanel = () => {
+    if (!isAuth) {
+      return null;
+    }
+    return (
+      <>
+        {renderSubTopPanel()}
+        {renderChat()}
+        {renderMenu()}
+      </>
+    );
+  };
+
+  return (
+    <div className="flex h-[100vh] w-[100wh] flex-col bg-gray-800">
+      {renderTopPanel()}
+      {renderAuthForm()}
+      {renderControlPanel()}
     </div>
   );
 };

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Title } from './Title';
 import { ChatLog } from './chat/ChatLog';
 import { Message } from '../types/Message';
+import { LogoutProps } from './interfaces/logout';
 
-export const Observer: React.FC = () => {
+export const Observer: React.FC<LogoutProps> = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
