@@ -79,21 +79,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
     onClose();
   };
 
-  const renderFinish = () => {
-    return (
-      <div className="space-y-4 text-center">
-        <div className="text-6xl">🎉</div>
-        <h3 className="text-2xl font-semibold text-green-500">Игра успешно создана!</h3>
-        <button
-          onClick={onClose}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          Закрыть
-        </button>
-      </div>
-    );
-  };
-
   const renderConfirm = () => {
     return (
       <ConfirmNewGame
@@ -259,10 +244,11 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
     switch (currentStep) {
       case 'start':
         return renderCreate();
-      case 'finish':
-        return renderFinish();
       case 'confirm':
         return renderConfirm();
+      case 'finish':
+        onClose();
+        return;
       default:
         renderLoading();
     }
@@ -274,9 +260,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
 
   return (
     <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
-      <div className="w-full max-w-md rounded-lg bg-gray-800 p-6 shadow-xl">
-        {render()}
-      </div>
+      <div className="w-full max-w-md rounded-lg bg-gray-800 p-6 shadow-xl">{render()}</div>
     </div>
   );
 };
