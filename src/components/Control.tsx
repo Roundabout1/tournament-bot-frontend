@@ -190,6 +190,12 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             }
             break;
 
+          case 'game_info':
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            break;
+
           case 'delete_player':
             var sub = data.subtype;
             if (sub != 'list') {
