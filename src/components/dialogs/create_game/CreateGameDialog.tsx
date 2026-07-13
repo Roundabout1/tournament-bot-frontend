@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CreateGameState, ShuffleType } from './types';
-import { ConfirmNewGame } from './steps/ConfirmNewGame';
+import { ConfirmNewGame } from './ConfirmNewGame';
 
 interface CreateGameDialogProps {
   onClose: () => void;
