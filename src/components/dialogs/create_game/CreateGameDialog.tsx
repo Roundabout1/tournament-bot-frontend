@@ -58,8 +58,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
       return;
     }
 
-    setError(null);
-
     // Отправляем все данные одной командой
     sendMessage('create_game', 'make', {
       num_players: numPlayers,
@@ -73,6 +71,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   };
 
   const handleCancel = () => {
+    setError(null);
     sendMessage('create_game', 'cancel');
     onClose();
   };

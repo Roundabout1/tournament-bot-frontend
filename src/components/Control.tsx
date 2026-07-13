@@ -184,6 +184,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             setGameCreationStep(data.subtype);
             if (data.subtype === 'start' || data.subtype === 'confirm') {
               switchLayout('create_game');
+              setAppError(null);
             }
             if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
