@@ -20,6 +20,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   const [numPlayers, setNumPlayers] = useState<number>(4);
   const [shuffleType, setShuffleType] = useState<ShuffleType>(ShuffleType.Round);
   const [numTours, setNumTours] = useState<number>(2);
+  const [suggestedTours, setSuggestedTours] = useState<number | null>(null);
   const [multiplier, setMultiplier] = useState<number>(1);
   const [groupSize, setGroupSize] = useState<number>(3);
   const [isAsymmetric, setIsAsymmetric] = useState<boolean>(false);
@@ -28,6 +29,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
 
   const isShuffleMulti = shuffleType === ShuffleType.MultiTournament;
   const isShuffleRound = shuffleType === ShuffleType.Round;
+  const hasToursField = shuffleType === ShuffleType.Random || shuffleType === ShuffleType.Rating;
 
   useEffect(() => {
     if (!serverError) {
@@ -35,6 +37,16 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
     }
     setError(serverError);
   }, [serverError]);
+
+  const getMaxTours = (players: number) => {
+    return Math.floor(players / 2);
+  };
+
+  useEffect(() => {
+    if (hasToursField) {
+      setSuggestedTours(getMaxTours(numPlayers));
+    }
+  }, [shuffleType, numPlayers]);
 
   const handleSubmit = () => {
     // Валидация
@@ -53,8 +65,10 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
       return;
     }
 
-    if ((shuffleType === ShuffleType.Random || shuffleType === ShuffleType.Rating) && numTours > numPlayers / 2) {
-      setError(`В игре типа "${shuffleType}" количество турниров не должно превышать половину от количества игроков`);
+    if (hasToursField && numTours > getMaxTours(numPlayers)) {
+      setError(
+        `В игре типа "${shuffleType}" количество турниров не должно превышать половину от количества игроков`,
+      );
       return;
     }
 
@@ -67,7 +81,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
     sendMessage('create_game', 'make', {
       num_players: numPlayers,
       shuffle: shuffleType,
-      num_tours: isShuffleRound ? null : numTours,
+      num_tours: hasToursField ? numTours : null,
       multiplier: isShuffleRound ? multiplier : null,
       size_group: isShuffleMulti ? groupSize : null,
       is_asymmetric: isAsymmetric,
@@ -121,9 +135,9 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
           </label>
           <input
             type="number"
-            min="2"
+            min={2}
             value={numPlayers}
-            onChange={(e) => setNumPlayers(parseInt(e.target.value) || 2)}
+            onChange={(e) => setNumPlayers(parseInt(e.target.value))}
             className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
           />
         </div>
@@ -144,22 +158,21 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
           </select>
         </div>
 
-        {/* Количество туров (не для круговой) */}
-        {!isShuffleRound && (
+        {/* Количество туров*/}
+        {hasToursField && (
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-300">
               Количество туров:
-              {/* {!isShuffleMulti && (
-                  <span className="ml-2 text-xs text-gray-400">
-                    (рекомендуется: {suggestedTours || numPlayers})
-                  </span>
-                )} */}
+              {suggestedTours && (
+                <span className="ml-2 text-xs text-gray-400">
+                  (рекомендуется: {suggestedTours})
+                </span>
+              )}
             </label>
             <input
               type="number"
-              min="1"
               value={numTours}
-              onChange={(e) => setNumTours(parseInt(e.target.value) || 1)}
+              onChange={(e) => setNumTours(parseInt(e.target.value))}
               className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -171,9 +184,8 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
             <label className="mb-1 block text-sm font-medium text-gray-300">Множитель туров:</label>
             <input
               type="number"
-              min="1"
               value={multiplier}
-              onChange={(e) => setMultiplier(parseInt(e.target.value) || 1)}
+              onChange={(e) => setMultiplier(parseInt(e.target.value))}
               className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
             />
             <p className="mt-1 text-xs text-gray-400">
@@ -188,9 +200,8 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
             <label className="mb-1 block text-sm font-medium text-gray-300">Размер группы:</label>
             <input
               type="number"
-              min="2"
               value={groupSize}
-              onChange={(e) => setGroupSize(parseInt(e.target.value) || 2)}
+              onChange={(e) => setGroupSize(parseInt(e.target.value))}
               className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
             />
           </div>
