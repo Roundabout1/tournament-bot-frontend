@@ -18,7 +18,7 @@ export const COMMAND_TEXTS: Record<string, Record<string, CommandConfig>> = {
           Круговая: '🔄',
           Рейтинговая: '📊',
           Случайная: '🎲',
-          'Мульти-турнир': '🏆',
+          'Мульти-турнир': '👑',
         };
         const icon = shuffleIcons[params.shuffle] || '🎯';
         let text = `🎮 Создание игры:\n`;
