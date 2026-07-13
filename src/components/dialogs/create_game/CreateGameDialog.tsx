@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreateGameState } from './types';
+import { CreateGameState, ShuffleType } from './types';
 import { ConfirmNewGame } from './steps/ConfirmNewGame';
 
 interface CreateGameDialogProps {
@@ -10,8 +10,6 @@ interface CreateGameDialogProps {
   serverError: string | null;
 }
 
-type ShuffleType = 'Круговая' | 'Рейтинговая' | 'Случайная' | 'Мульти-турнир';
-
 export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   onClose,
   sendMessage,
@@ -20,7 +18,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   serverError,
 }) => {
   const [numPlayers, setNumPlayers] = useState<number>(4);
-  const [shuffleType, setShuffleType] = useState<ShuffleType>('Круговая');
+  const [shuffleType, setShuffleType] = useState<ShuffleType>(ShuffleType.Round);
   const [numTours, setNumTours] = useState<number>(2);
   const [multiplier, setMultiplier] = useState<number>(1);
   const [groupSize, setGroupSize] = useState<number>(3);
@@ -28,8 +26,8 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   const [hasFines, setHasFines] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isShuffleMulti = shuffleType === 'Мульти-турнир';
-  const isShuffleRound = shuffleType === 'Круговая';
+  const isShuffleMulti = shuffleType === ShuffleType.MultiTournament;
+  const isShuffleRound = shuffleType === ShuffleType.Round;
 
   useEffect(() => {
     if (!serverError) {
@@ -134,10 +132,11 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
             onChange={(e) => setShuffleType(e.target.value as ShuffleType)}
             className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
           >
-            <option value="Круговая">Круговая</option>
-            <option value="Рейтинговая">Рейтинговая</option>
-            <option value="Случайная">Случайная</option>
-            <option value="Мульти-турнир">Мульти-турнир</option>
+            {Object.entries(ShuffleType).map(([key, value]) => (
+              <option key={key} value={value}>
+                {value}
+              </option>
+            ))}
           </select>
         </div>
 
