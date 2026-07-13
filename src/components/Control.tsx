@@ -44,7 +44,6 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const [clientName, setClientName] = useState<string>('');
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameState | null>(null);
-  //const [suggestedTours] = useState<number | null>(null);
   const [playerList, setPlayerList] = useState<string[]>([]);
   const [addResultsTables, setAddResultsTables] = useState<string[]>([]);
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
