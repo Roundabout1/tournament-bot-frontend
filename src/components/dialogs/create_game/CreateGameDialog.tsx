@@ -53,6 +53,11 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
       return;
     }
 
+    if ((shuffleType === ShuffleType.Random || shuffleType === ShuffleType.Rating) && numTours > numPlayers / 2) {
+      setError(`В игре типа "${shuffleType}" количество турниров не должно превышать половину от количества игроков`);
+      return;
+    }
+
     if (numTours < 1) {
       setError('Количество туров должно быть не менее 1');
       return;
