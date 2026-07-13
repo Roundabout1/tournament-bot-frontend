@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { DialogForm } from '../../DialogForm';
-import { ConfirmationForm } from '../../ConfirmationForm';
+import { DialogForm } from '../DialogForm';
+import { ConfirmationForm } from '../ConfirmationForm';
 
 interface ConfirmNewGameProps {
   onConfirm: (download: boolean) => void;
