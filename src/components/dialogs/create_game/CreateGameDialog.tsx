@@ -31,6 +31,22 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   const isShuffleRound = shuffleType === ShuffleType.Round;
   const hasToursField = shuffleType === ShuffleType.Random || shuffleType === ShuffleType.Rating;
 
+  // Получение делителей числа (для размера группы)
+  const getDivisors = (num: number): number[] => {
+    if (num < 3) {
+      return [];
+    }
+    const divisors: number[] = [];
+    const isEven = num % 2 === 0;
+    for (let i = 3; i <= num / 2; i += isEven ? 1 : 2) {
+      if (num % i === 0) {
+        divisors.push(i);
+      }
+    }
+    divisors.push(num);
+    return divisors;
+  };
+
   useEffect(() => {
     if (!serverError) {
       return;
@@ -48,6 +64,16 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
     }
   }, [shuffleType, numPlayers]);
 
+  // Обновляем размер группы при изменении количества игроков
+  useEffect(() => {
+    if (isShuffleMulti) {
+      const divisors = getDivisors(numPlayers);
+      if (divisors.length > 0) {
+        setGroupSize(divisors[0]);
+      }
+    }
+  }, [numPlayers, isShuffleMulti]);
+
   const handleSubmit = () => {
     // Валидация
     if (numPlayers < 2) {
@@ -55,9 +81,16 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
       return;
     }
 
-    if (isShuffleMulti && groupSize < 3) {
-      setError('Размер группы должен быть не менее 3');
-      return;
+    if (isShuffleMulti) {
+      const divisors = getDivisors(numPlayers);
+      if (divisors.length === 0) {
+        setError('Нет подходящего размера группы для данного количества игроков');
+        return;
+      }
+      if (!divisors.includes(groupSize)) {
+        setError('Выберите корректный размер группы');
+        return;
+      }
     }
 
     if (isShuffleRound && multiplier < 1) {
@@ -122,6 +155,9 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   };
 
   const renderCreate = () => {
+    const divisors = isShuffleMulti ? getDivisors(numPlayers) : [];
+    const hasValidDivisors = divisors.length > 0;
+
     return (
       <div className="space-y-4">
         <div className="rounded-lg bg-gray-700 p-3 text-center">
@@ -135,7 +171,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
           </label>
           <input
             type="number"
-            min={2}
             value={numPlayers}
             onChange={(e) => setNumPlayers(parseInt(e.target.value))}
             className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
@@ -197,13 +232,31 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
         {/* Размер группы (только для мульти-турнира) */}
         {isShuffleMulti && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-300">Размер группы:</label>
-            <input
-              type="number"
+            <label className="mb-1 block text-sm font-medium text-gray-300">
+              Размер группы:
+              {!hasValidDivisors && (
+                <span className="ml-2 text-xs text-red-400">
+                  (нет подходящих размеров для {numPlayers} игроков)
+                </span>
+              )}
+            </label>
+            <select
               value={groupSize}
               onChange={(e) => setGroupSize(parseInt(e.target.value))}
               className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-            />
+              disabled={!hasValidDivisors}
+            >
+              {divisors.map((divisor) => (
+                <option key={divisor} value={divisor}>
+                  {divisor}
+                </option>
+              ))}
+            </select>
+            {hasValidDivisors && (
+              <p className="mt-1 text-xs text-gray-400">
+                Количество групп: {numPlayers / groupSize}
+              </p>
+            )}
           </div>
         )}
 
