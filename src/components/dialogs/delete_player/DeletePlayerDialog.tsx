@@ -63,12 +63,14 @@ export const DeletePlayerDialog: React.FC<DeletePlayerDialogProps> = ({
   const render = () => {
     if (confirmTarget) {
       return (
-        <DialogForm header={`Вы уверены, что хотите удалить ${isIdleDelete ? 'всех неактивных игроков' : `игрока ${confirmTarget}`}?`}>
+        <DialogForm
+          header={`Вы уверены, что хотите удалить ${isIdleDelete ? 'всех неактивных игроков' : `игрока ${confirmTarget}`}?`}
+        >
           <ConfirmationForm
             handleAccept={handleConfirm}
-            acceptText='Да'
+            acceptText="Да"
             handleReject={handleCancel}
-            rejectText='Нет'
+            rejectText="Нет"
           />
         </DialogForm>
       );
@@ -83,7 +85,9 @@ export const DeletePlayerDialog: React.FC<DeletePlayerDialogProps> = ({
 
   return (
     <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
-      <div className="w-full max-w-md rounded-lg bg-gray-800 p-6 shadow-xl">{render()}</div>
+      <div className="max-h-11/12 w-full max-w-md overflow-y-auto rounded-lg bg-gray-800 p-6 shadow-xl">
+        {render()}
+      </div>
     </div>
   );
 };
