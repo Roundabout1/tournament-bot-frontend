@@ -38,7 +38,7 @@ export const ButtonsList: React.FC<ButtonsListProps> = ({
   
   return (
     <div className={twMerge(
-      "flex gap-2 disabled:opacity-50",
+      "flex gap-2 disabled:opacity-50 overflow-auto",
       directionClass,
       alignmentClasses[alignment],
     )}>

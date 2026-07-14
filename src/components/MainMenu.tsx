@@ -95,5 +95,5 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       hidden: !isAdmin,
     },
   ];
-  return <ButtonsList buttonClassName="w-96 py-2 h-auto" buttons={buttons} disabled={disabled} />;
+  return <ButtonsList buttons={buttons} disabled={disabled} />;
 };
