@@ -57,6 +57,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const [isMenuFreezed, setIsMenuFreezed] = useState<boolean>(true);
   const [authError, setAuthError] = useState<boolean>(false);
   const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
+  const [isPassRequired, setIsPassRequired] = useState<boolean>(false);
   const [chatSessionStore, setChatSessionStore] = useState<boolean>(true);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -164,6 +165,9 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
 
         // Обрабатываем разные типы сообщений
         switch (data.type) {
+          case 'before_auth':
+            setIsPassRequired(data.is_pass_required);
+            break;
           case 'connection':
             addChatMessage(`${data.message}`, 'server', 'Сервер');
             setIsAuth(true);
@@ -536,6 +540,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
         authError={authError}
         isWaitingData={isWaitingAuth}
         isAdmin={isAdmin}
+        isPassRequired={isPassRequired}
       />
     );
   };

@@ -9,9 +9,16 @@ interface AuthProps {
   authError: boolean;
   isWaitingData: boolean;
   isAdmin: boolean;
+  isPassRequired: boolean;
 }
 
-export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData, isAdmin }) => {
+export const Auth: React.FC<AuthProps> = ({
+  onSubmit,
+  authError,
+  isWaitingData,
+  isAdmin,
+  isPassRequired,
+}) => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [login, setLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -73,19 +80,18 @@ export const Auth: React.FC<AuthProps> = ({ onSubmit, authError, isWaitingData, 
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
           <Input
-            maxLength={20}
             onChange={(e) => onLoginChange(e.target.value)}
             placeholder="Имя пользователя"
             required={true}
             disabled={isWaitingData}
           />
           <Input
-            maxLength={20}
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder="Пароль"
             type={'password'}
             required={false}
             disabled={isWaitingData}
+            hidden={!isPassRequired}
           />
           {error && <span className="text-red-500"> {error} </span>}
           <button
