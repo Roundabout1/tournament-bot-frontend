@@ -1,4 +1,5 @@
 import { ButtonsList } from './ButtonsList';
+import { ShuffleType } from './dialogs/create_game/types';
 
 interface MainMenuProps {
   sendWebSocketMessage: (type: string, subtype: string, content?: any) => void;
@@ -6,6 +7,7 @@ interface MainMenuProps {
   downloadRoundsData: () => void;
   isAdmin: boolean;
   disabled?: boolean;
+  shuffleType: ShuffleType | null;
 }
 
 export const MainMenu: React.FC<MainMenuProps> = ({
@@ -13,6 +15,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   downloadSumUp,
   downloadRoundsData,
   isAdmin,
+  shuffleType,
   disabled = false,
 }) => {
   const handleCreateGame = () => {
@@ -77,12 +80,12 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Удалить игрока',
       action: handleRemovePlayer,
-      hidden: !isAdmin,
+      hidden: !isAdmin && shuffleType != ShuffleType.MultiTournament,
     },
     {
       text: 'Вернуть игрока',
       action: handleRestorePlayer,
-      hidden: !isAdmin, // TODO: если удалённых игроков нет, то кнопка спрятана
+      hidden: !isAdmin && shuffleType != ShuffleType.MultiTournament, // TODO: если удалённых игроков нет, то кнопка спрятана
     },
     {
       text: 'Подвести итоги',
