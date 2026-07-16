@@ -211,11 +211,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-300">
               Количество туров:
-              {suggestedTours && (
-                <span className="ml-2 text-xs text-gray-400">
-                  (рекомендуется: {suggestedTours})
-                </span>
-              )}
             </label>
             <input
               type="number"
@@ -223,6 +218,11 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
               onChange={(e) => setNumTours(parseInt(e.target.value))}
               className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
             />
+            {suggestedTours && (
+              <p className="mt-1 text-xs text-gray-400">
+                Рекомендуемое количество: {suggestedTours}
+              </p>
+            )}
           </div>
         )}
 
