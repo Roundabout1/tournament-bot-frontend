@@ -8,7 +8,7 @@ interface ConfirmNewGameProps {
 }
 
 export const ConfirmNewGame: React.FC<ConfirmNewGameProps> = ({ onConfirm, onCancel }) => {
-  const [confirmNewGame, setConfirmNewGame] = useState<boolean>(false);
+  const [confirmDownload, setConfirmDownload] = useState<boolean>(true);
 
   const handleConfirm = (confirm: boolean, download: boolean) => {
     if (!confirm) {
@@ -18,30 +18,25 @@ export const ConfirmNewGame: React.FC<ConfirmNewGameProps> = ({ onConfirm, onCan
     onConfirm(download);
   };
 
-  const render = () => {
-    if (confirmNewGame) {
-      return (
-        <DialogForm header={`Вы хотите сохранить таблицы с результатами завершённой игры?`}>
-          <ConfirmationForm
-            handleAccept={() => handleConfirm(true, true)}
-            acceptText="Да"
-            handleReject={() => handleConfirm(true, false)}
-            rejectText="Нет"
-          />
-        </DialogForm>
-      );
-    }
-    return (
-      <DialogForm header={'Создать новую игру?'}>
-        <ConfirmationForm
-          acceptText="Создать новую"
-          handleAccept={() => setConfirmNewGame(true)}
-          rejectText="Отмена"
-          handleReject={() => handleConfirm(false, false)}
+  return (
+    <DialogForm header={'Создать новую игру?'}>
+      <ConfirmationForm
+        acceptText="Создать новую"
+        handleAccept={() => handleConfirm(true, confirmDownload)}
+        rejectText="Отмена"
+        handleReject={() => handleConfirm(false, false)}
+      />
+      <label className="flex cursor-pointer items-center space-x-3">
+        <input
+          type="checkbox"
+          checked={confirmDownload}
+          onChange={(e) => setConfirmDownload(e.target.checked)}
+          className="form-checkbox h-4 w-4 rounded border-gray-500 bg-gray-600 text-blue-600 focus:ring-blue-500"
         />
-      </DialogForm>
-    );
-  };
-
-  return render();
+        <span className="text-sm text-gray-300">
+          Сохранить таблицы с результатами завершённой игры
+        </span>
+      </label>
+    </DialogForm>
+  );
 };

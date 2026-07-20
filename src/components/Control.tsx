@@ -123,11 +123,6 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   useEffect(() => {
     connectWebSocket();
 
-    // Добавляем приветственное сообщение только если нет сохранённых сообщений
-    if (messages.length === 0) {
-      addChatMessage('Добро пожаловать в систему управления турниром!', 'system');
-    }
-
     return () => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.close();
@@ -155,7 +150,6 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
       setIsConnected(true);
       setConnectionError(false);
       setIsAuth(false);
-      addChatMessage('Соединение с сервером установлено', 'system');
     };
 
     // обработка входящих сообщений

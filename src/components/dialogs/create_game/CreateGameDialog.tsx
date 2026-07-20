@@ -17,7 +17,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   currentStep,
   serverError,
 }) => {
-  const [numPlayers, setNumPlayers] = useState<number>(4);
+  const [numPlayers, setNumPlayers] = useState<number | undefined>(4);
   const [shuffleType, setShuffleType] = useState<ShuffleType>(ShuffleType.Round);
   const [numTours, setNumTours] = useState<number>(2);
   const [suggestedTours, setSuggestedTours] = useState<number | null>(null);
@@ -60,22 +60,34 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
 
   useEffect(() => {
     if (hasToursField) {
-      setSuggestedTours(getMaxTours(numPlayers));
+      if (numPlayers) {
+        setSuggestedTours(getMaxTours(numPlayers));
+      } else {
+        setSuggestedTours(null);
+      }
     }
   }, [shuffleType, numPlayers]);
 
   // Обновляем размер группы при изменении количества игроков
   useEffect(() => {
     if (isShuffleMulti) {
-      const divisors = getDivisors(numPlayers);
-      if (divisors.length > 0) {
-        setGroupSize(divisors[0]);
+      if (numPlayers) {
+        const divisors = getDivisors(numPlayers);
+        if (divisors.length > 0) {
+          setGroupSize(divisors[0]);
+        }
+      } else {
+        setGroupSize(0);
       }
     }
   }, [numPlayers, isShuffleMulti]);
 
   const handleSubmit = () => {
     // Валидация
+    if (!numPlayers) {
+      setError('Укажите количество игроков');
+      return;
+    }
     if (numPlayers < 2) {
       setError('Минимальное количество игроков - 2');
       return;
@@ -155,7 +167,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
   };
 
   const renderCreate = () => {
-    const divisors = isShuffleMulti ? getDivisors(numPlayers) : [];
+    const divisors = isShuffleMulti && numPlayers ? getDivisors(numPlayers) : [];
     const hasValidDivisors = divisors.length > 0;
 
     return (
@@ -174,6 +186,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
             value={numPlayers}
             onChange={(e) => setNumPlayers(parseInt(e.target.value))}
             className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+            required={true}
           />
         </div>
 
@@ -198,11 +211,6 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-300">
               Количество туров:
-              {suggestedTours && (
-                <span className="ml-2 text-xs text-gray-400">
-                  (рекомендуется: {suggestedTours})
-                </span>
-              )}
             </label>
             <input
               type="number"
@@ -210,6 +218,11 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
               onChange={(e) => setNumTours(parseInt(e.target.value))}
               className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
             />
+            {suggestedTours && (
+              <p className="mt-1 text-xs text-gray-400">
+                Рекомендуемое количество: {suggestedTours}
+              </p>
+            )}
           </div>
         )}
 
@@ -252,7 +265,7 @@ export const CreateGameDialog: React.FC<CreateGameDialogProps> = ({
                 </option>
               ))}
             </select>
-            {hasValidDivisors && (
+            {hasValidDivisors && numPlayers && (
               <p className="mt-1 text-xs text-gray-400">
                 Количество групп: {numPlayers / groupSize}
               </p>
