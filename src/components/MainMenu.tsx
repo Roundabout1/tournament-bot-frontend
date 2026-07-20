@@ -80,12 +80,12 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Удалить игрока',
       action: handleRemovePlayer,
-      hidden: !isAdmin && shuffleType != ShuffleType.MultiTournament,
+      hidden: !isAdmin || !shuffleType || shuffleType === ShuffleType.MultiTournament,
     },
     {
       text: 'Вернуть игрока',
       action: handleRestorePlayer,
-      hidden: !isAdmin && shuffleType != ShuffleType.MultiTournament, // TODO: если удалённых игроков нет, то кнопка спрятана
+      hidden: !isAdmin || !shuffleType || shuffleType === ShuffleType.MultiTournament, // TODO: если удалённых игроков нет, то кнопка спрятана
     },
     {
       text: 'Подвести итоги',

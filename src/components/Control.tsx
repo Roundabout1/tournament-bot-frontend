@@ -169,9 +169,6 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             setAuthError(false);
             setisWaitingAuth(false);
             setIsMenuFreezed(false);
-            if (data.shuffle_type) {
-              setShuffleType(shuffleType);
-            }
             break;
 
           case 'incorrect_password':
