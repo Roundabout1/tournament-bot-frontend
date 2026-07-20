@@ -196,6 +196,9 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
             }
+            if (data.shuffle) {
+              setShuffleType(data.shuffle);
+            }
             break;
 
           case 'delete_player':
