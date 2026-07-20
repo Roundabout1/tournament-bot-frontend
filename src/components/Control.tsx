@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CreateGameDialog } from './dialogs/create_game/CreateGameDialog';
 import { Layout } from '../types/Layout';
 import { MainMenu } from './MainMenu';
-import { ConfirmData, CreateGameState } from './dialogs/create_game/types';
+import { ConfirmData, CreateGameState, ShuffleType } from './dialogs/create_game/types';
 import { Message } from '../types/Message';
 import { ChatLog } from './chat/ChatLog';
 import { getCommandText } from '../types/CommandTexts';
@@ -59,6 +59,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const [isWaitingAuth, setisWaitingAuth] = useState<boolean>(false);
   const [isPassRequired, setIsPassRequired] = useState<boolean>(false);
   const [chatSessionStore, setChatSessionStore] = useState<boolean>(true);
+  const [shuffleType, setShuffleType] = useState<ShuffleType | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Сохранение сообщений в sessionStorage при каждом изменении
@@ -168,6 +169,9 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             setAuthError(false);
             setisWaitingAuth(false);
             setIsMenuFreezed(false);
+            if (data.shuffle_type) {
+              setShuffleType(shuffleType);
+            }
             break;
 
           case 'incorrect_password':
@@ -191,6 +195,9 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
           case 'game_info':
             if (data.message) {
               addChatMessage(data.message, 'server', 'Сервер');
+            }
+            if (data.shuffle) {
+              setShuffleType(data.shuffle);
             }
             break;
 
@@ -418,6 +425,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             sendWebSocketMessage={sendWebSocketMessage}
             downloadSumUp={downloadSumUp}
             downloadRoundsData={downloadRoundsData}
+            shuffleType={shuffleType}
           />
         );
       case 'create_game':
