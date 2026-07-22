@@ -22,6 +22,10 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     sendWebSocketMessage('create_game', 'start');
   };
 
+  const handleLoadGame = () => {
+    sendWebSocketMessage('load_game', 'list');
+  };
+
   const handleAddResults = () => {
     sendWebSocketMessage('add_results', 'start');
   };
@@ -58,6 +62,11 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     {
       text: 'Создать игру',
       action: handleCreateGame,
+      hidden: !isAdmin,
+    },
+    {
+      text: 'Загрузить игру',
+      action: handleLoadGame,
       hidden: !isAdmin,
     },
     {
