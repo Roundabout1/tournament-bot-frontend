@@ -7,11 +7,11 @@ import { ConfirmationForm } from '../ConfirmationForm';
 interface LoadGameDialogProps {
   onClose: () => void;
   sendMessage: (type: string, subtype: string, content?: any) => void;
-  players: string[];
+  saves: string[];
 }
 
 export const LoadGameDialog: React.FC<LoadGameDialogProps> = ({
-  players,
+  saves,
   onClose,
   sendMessage,
 }) => {
@@ -37,7 +37,7 @@ export const LoadGameDialog: React.FC<LoadGameDialogProps> = ({
     setConfirmTarget(null);
   };
 
-  const buttons = players
+  const buttons = saves
     .map((x) => ({
       text: x,
       action: () => handleLoadClick(x),
