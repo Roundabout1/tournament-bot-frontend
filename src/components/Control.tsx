@@ -14,6 +14,7 @@ import { Auth } from './Auth';
 import { RestorePlayerDialog } from './dialogs/restore_player/ResotrePlayerDialog';
 import { MESSAGES_STORAGE_KEY } from '../consts/StorageKeys';
 import { LogoutProps } from './interfaces/logout';
+import { LoadGameDialog } from './dialogs/load_game/LoadGameDialog';
 
 interface ControlProps extends LogoutProps {
   isAdmin: boolean;
@@ -45,6 +46,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
   const [layout, setLayout] = useState<Layout>('main');
   const [gameCreationStep, setGameCreationStep] = useState<CreateGameState | null>(null);
   const [playerList, setPlayerList] = useState<string[]>([]);
+  const [gameSaves, setGameSaves] = useState<string[]>([]);
   const [addResultsTables, setAddResultsTables] = useState<string[]>([]);
   const [addResultsTableInfo, setAddResultsTableInfo] = useState<any>(null);
   const [addResultsStep, setAddResultsStep] = useState<string>('start');
@@ -198,8 +200,8 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             }
             break;
 
-          case 'delete_player':
-            var sub = data.subtype;
+          case 'delete_player': {
+            const sub = data.subtype;
             if (sub != 'list') {
               console.warn('Ожидается subtype: list');
               addChatMessage('Ошибка! Получено некорректное сообщение от сервера!', 'error');
@@ -217,9 +219,10 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             setPlayerList(players);
             switchLayout('delete_player');
             break;
+          }
 
-          case 'restore_player':
-            var sub = data.subtype;
+          case 'restore_player': {
+            const sub = data.subtype;
             if (sub != 'list') {
               console.warn('Ожидается subtype: list');
               addChatMessage('Ошибка! Получено некорректное сообщение от сервера!', 'error');
@@ -237,6 +240,7 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             setPlayerList(players);
             switchLayout('restore_player');
             break;
+          }
 
           case 'add_results':
             if (data.subtype === 'start') {
@@ -319,6 +323,24 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
           case 'game_closed':
             addChatMessage(data.message, 'server');
             break;
+
+          case 'load_game': {
+            const sub = data.subtype;
+            if (sub === 'list') {
+              const saves = data.saves;
+              if (!data.saves) {
+                console.warn('Ожидается поле saves');
+                addChatMessage('Ошибка! От сервера не пришёл список файлов!', 'error');
+                break;
+              }
+              setGameSaves(saves);
+              switchLayout('load_game');
+            }
+            if (data.message) {
+              addChatMessage(data.message, 'server', 'Сервер');
+            }
+            break;
+          }
 
           default:
             addChatMessage(`Получено: ${JSON.stringify(data)}`, 'server', 'Сервер');
@@ -444,6 +466,17 @@ export const Control: React.FC<ControlProps> = ({ isAdmin, logout }) => {
             }}
             currentStep={gameCreationStep}
             serverError={appError}
+          />
+        );
+      case 'load_game':
+        return (
+          <LoadGameDialog
+            onClose={() => {
+              returnToMain();
+              setGameSaves([]);
+            }}
+            sendMessage={sendWebSocketMessage}
+            saves={gameSaves}
           />
         );
       case 'delete_player':
